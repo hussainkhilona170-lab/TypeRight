@@ -1,0 +1,3355 @@
+[
+    {
+        "ElementName":  "(^(bcc|cc|find|link)\\b)|(^to:?$)",
+        "IsEnabled":  false,
+        "Language":  "English",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^(cco|cc|(encontrar|buscar)|enlace|para:?)\\b",
+        "IsEnabled":  false,
+        "Language":  "Spanish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^((скрытая\\s?копия|ск)|копия|(найти|поиск)|ссылка|кому)\\b",
+        "IsEnabled":  false,
+        "Language":  "Russian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(cci|cc|(trouver|rechercher)|lien)\\b)|(^à:?$)",
+        "IsEnabled":  false,
+        "Language":  "French",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(bcc|cc|(finden|suchen)|link|zu)\\b)|(^an:?$)",
+        "IsEnabled":  false,
+        "Language":  "German",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(ccn|cc|((cerca\\sin)|trova)|link|per)\\b)|(^a:?$)",
+        "IsEnabled":  false,
+        "Language":  "Italian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(cco|cc|(encontrar|pesquisar)|link)\\b)|(^para:?$)",
+        "IsEnabled":  false,
+        "Language":  "Portuguese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(gizli|bilgi|cc|(bul|ara)|bağlantı)\\b)|(^kime:?$)",
+        "IsEnabled":  false,
+        "Language":  "Turkish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(ukp|dw|cc|(znajdź|szukaj)|link)\\b)|(^do:?$)",
+        "IsEnabled":  false,
+        "Language":  "Polish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(bcc|cc|(zoeken|vinden)|link)\\b)|(^aan:?$)",
+        "IsEnabled":  false,
+        "Language":  "Dutch",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(skrytá|kopie|cc|(najít|hledat)|odkaz)\\b)|(^komu:?$)",
+        "IsEnabled":  false,
+        "Language":  "Czech",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(bcc|cc|tìm|liên\\skết)\\b)|(^tới:?$)",
+        "IsEnabled":  false,
+        "Language":  "Vietnamese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(titkos|másolat|cc|(keresés|keres)|hivatkozás)\\b)|(^címzett:?$)",
+        "IsEnabled":  false,
+        "Language":  "Hungarian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(hemlig|kopia|cc|(sök|hitta)|länk)\\b)|(^till:?$)",
+        "IsEnabled":  false,
+        "Language":  "Swedish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(bcc|cc|(căutare|găsește)|link)\\b)|(^către:?$)",
+        "IsEnabled":  false,
+        "Language":  "Romanian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(bcc|cc|(cari|temukan)|tautan)\\b)|(^kepada:?$)",
+        "IsEnabled":  false,
+        "Language":  "Indonesian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(skrytá|kópia|cc|(nájsť|hľadať)|odkaz)\\b)|(^komu:?$)",
+        "IsEnabled":  false,
+        "Language":  "Slovak",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(bcc|cc|(søg|find)|link)\\b)|(^til:?$)",
+        "IsEnabled":  false,
+        "Language":  "Danish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(piilokopio|kopio|cc|(etsi|hae)|linkki)\\b)|(^vastaanottaja:?$)",
+        "IsEnabled":  false,
+        "Language":  "Finnish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(blindkopi|kopi|cc|(søk|finn)|lenke)\\b)|(^til:?$)",
+        "IsEnabled":  false,
+        "Language":  "Norwegian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "(^(bcc|cc|(hanapin|maghanap)|link)\\b)|(^para\\ssa:?$)",
+        "IsEnabled":  false,
+        "Language":  "Tagalog",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^(прихована\\s?копія|копія|(знайти|пошук)|посилання|кому)\\b",
+        "IsEnabled":  false,
+        "Language":  "Ukrainian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^(숨은\\s?참조|참조|검색|링크|받는\\s?사람)",
+        "IsEnabled":  false,
+        "Language":  "Korean",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^(密件抄送|抄送|查找|搜索|链接|收件人|密件副本|副本|連結)",
+        "IsEnabled":  false,
+        "Language":  "Chinese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^(BCC|CC|検索|リンク|宛先)",
+        "IsEnabled":  false,
+        "Language":  "Japanese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^(गुप्त\\sप्रति|प्रतिलिपि|खोजें|लिंक|प्रति)",
+        "IsEnabled":  false,
+        "Language":  "Hindi",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "ElementName":  "^(نسخة\\sمخفية|نسخة|بحث|رابط|إلى)",
+        "IsEnabled":  false,
+        "Language":  "Arabic",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Email reply"
+    },
+    {
+        "Domain":  ".*\\.zendesk\\.com",
+        "ElementName":  "Email composer",
+        "IsEnabled":  true,
+        "Notes":  "Allow Zendesk Email composer field - its accessible name contains \u0027email\u0027 which falsely triggers the Personal Info sensitivity rule"
+    },
+    {
+        "Domain":  ".*\\.hubspot\\.com",
+        "ElementName":  "Create an email",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "PBUG-3227: HubSpot email composer. Bypasses the global sensitivity regex (which falsely matches the \u0027email\u0027 substring). IgnoreEmptyDiv skips zero-height ancestors in the floating-panel so highlights can be drawn (same pattern as Smartsheet/SharePoint Lists)."
+    },
+    {
+        "Domain":  "mail\\.aol\\.com",
+        "ElementName":  "Email body",
+        "IsEnabled":  true,
+        "Notes":  "PBUG-3477: AOL Mail compose body. Bypasses the global sensitivity regex (which falsely matches the \u0027email\u0027 substring in the \u0027Email body\u0027 accessible name). Same pattern as Zendesk/HubSpot email composer allow-rules above."
+    },
+    {
+        "ElementName":  "\\bage\\b|birth|city|code|credit|\\bdate\\b|email|e-mail|mobile|\\bname\\b|number|password|phone|\\bpin\\b|search|user\\s?id|xxx|\\bkey\\b|\\secret\\b|\\bssn\\b|\\bsin\\b|\\bein\\b|\\bitin\\b|\\btin\\b|\\btfn\\b|\\bccv\\b|\\bpasswd\\b|\\bpwd\\b",
+        "IsEnabled":  false,
+        "Language":  "English",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\baños\\b|nacimiento|ciudad|código|crédito|\\bfecha\\b|correo|móvil|\\bnombre\\b|número|contraseña|teléfono|buscar|búsqueda|\\bid\\b",
+        "IsEnabled":  false,
+        "Language":  "Spanish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\bвозраст\\b|рождение|город|код|карта|\\bдата\\b|адрес|мобильный|телефон|номер|\\bимя\\b|пароль|пин|поиск|идентификатор",
+        "IsEnabled":  false,
+        "Language":  "Russian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\bâge\\b|naissance|ville|crédit|\\bnom\\b|nombre|mot\\sde\\spasse|téléphone|chercher|recherche",
+        "IsEnabled":  false,
+        "Language":  "French",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\balter\\b|geburt|stadt|anerkennung|\\bdatum\\b|mobiltelefon|nummer|passwort|telefon|suche|suchfunktion|benutzer-id",
+        "IsEnabled":  false,
+        "Language":  "German",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\betà\\b|nascita|città|codice|credito|\\bdata\\b|\\bnome\\b|numero|parola\\sd\u0027ordine|telefono|ricerca|cerca",
+        "IsEnabled":  false,
+        "Language":  "Italian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(idade|nascimento|cidade|código|crédito|data|nome|número|senha|telefone|celular|pesquisa|busca)\\b",
+        "IsEnabled":  false,
+        "Language":  "Portuguese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(yaş|doğum|şehir|kod|kredi|tarih|e-posta|cep|ad|numara|şifre|parola|telefon|arama)\\b",
+        "IsEnabled":  false,
+        "Language":  "Turkish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(wiek|urodzenie|miasto|kod|kredyt|data|imię|nazwisko|numer|hasło|telefon|komórka|szukaj|wyszukaj)\\b",
+        "IsEnabled":  false,
+        "Language":  "Polish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(leeftijd|geboorte|stad|code|krediet|datum|naam|nummer|wachtwoord|telefoon|mobiel|zoeken)\\b",
+        "IsEnabled":  false,
+        "Language":  "Dutch",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(věk|narození|město|kód|kredit|datum|jméno|číslo|heslo|telefon|mobil|hledat|vyhledat)\\b",
+        "IsEnabled":  false,
+        "Language":  "Czech",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(tuổi|sinh|thành\\sphố|mã|tín\\sdụng|ngày|tên|số|mật\\skhẩu|điện\\sthoại|di\\sđộng|tìm\\skiếm)\\b",
+        "IsEnabled":  false,
+        "Language":  "Vietnamese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(kor|születés|város|kód|hitel|dátum|név|szám|jelszó|telefon|mobil|keresés)\\b",
+        "IsEnabled":  false,
+        "Language":  "Hungarian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(ålder|födelse|stad|kod|kredit|datum|namn|nummer|lösenord|telefon|mobil|sök)\\b",
+        "IsEnabled":  false,
+        "Language":  "Swedish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(vârstă|naștere|oraș|cod|credit|dată|nume|număr|parolă|telefon|mobil|căutare)\\b",
+        "IsEnabled":  false,
+        "Language":  "Romanian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(usia|lahir|kota|kode|kredit|tanggal|nama|nomor|kata\\ssandi|telepon|ponsel|cari)\\b",
+        "IsEnabled":  false,
+        "Language":  "Indonesian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(vek|narodenie|mesto|kód|kredit|dátum|meno|číslo|heslo|telefón|mobil|hľadať|vyhľadať)\\b",
+        "IsEnabled":  false,
+        "Language":  "Slovak",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(alder|fødsel|by|kode|kredit|dato|navn|nummer|adgangskode|telefon|mobil|søg)\\b",
+        "IsEnabled":  false,
+        "Language":  "Danish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(ikä|syntymä|kaupunki|koodi|luotto|päivämäärä|nimi|numero|salasana|puhelin|haku)\\b",
+        "IsEnabled":  false,
+        "Language":  "Finnish",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(alder|fødsel|by|kode|kreditt|dato|navn|nummer|passord|telefon|mobil|søk)\\b",
+        "IsEnabled":  false,
+        "Language":  "Norwegian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(edad|kapanganakan|lungsod|kodigo|kredito|petsa|pangalan|numero|password|telepono|hanap)\\b",
+        "IsEnabled":  false,
+        "Language":  "Tagalog",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "\\b(вік|народження|місто|код|кредит|дата|ім\u0027я|номер|пароль|телефон|мобільний|пошук)\\b",
+        "IsEnabled":  false,
+        "Language":  "Ukrainian",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "나이|생년월일|도시|코드|신용|날짜|이름|번호|비밀번호|전화|휴대폰|검색",
+        "IsEnabled":  false,
+        "Language":  "Korean",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "年龄|年齡|出生|城市|代码|代碼|信用|日期|姓名|号码|號碼|密码|密碼|电话|電話|手机|手機|搜索|搜尋",
+        "IsEnabled":  false,
+        "Language":  "Chinese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "年齢|生年月日|都市|コード|クレジット|日付|名前|番号|パスワード|電話|携帯|検索",
+        "IsEnabled":  false,
+        "Language":  "Japanese",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "उम्र|जन्म|शहर|कोड|क्रेडिट|तारीख|नाम|नंबर|पासवर्ड|फ़ोन|मोबाइल|खोज",
+        "IsEnabled":  false,
+        "Language":  "Hindi",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "العمر|الميلاد|المدينة|الرمز|الائتمان|التاريخ|الاسم|الرقم|كلمة\\sالمرور|كلمة\\sالسر|الهاتف|الجوال|بحث",
+        "IsEnabled":  false,
+        "Language":  "Arabic",
+        "IsSensitivityCheck":  true,
+        "Notes":  "Personal Info"
+    },
+    {
+        "ElementName":  "account|address|authentication|authorization|log\\s?in|sign\\s?in|sign\\s?up",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "English",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "cuenta|habla|autenticación|autorización|iniciar|regístrate",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Spanish",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "compte|adresse|authentification|autorisation|se\\sconnecter|s’inscrire|s’enregister",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "French",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "счет|адрес|аутентификация|авторизация|войти|авторизоваться|регистрация|зарегистрироваться",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Russian",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "konto|authentifizierung|genehmigung|einloggen|anmelden",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "German",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "indirizzo|autenticazione|autorizzazione|accedi|registrati",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Italian",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(conta|endereço|autenticação|autorização|entrar|iniciar\\ssessão|cadastrar|registrar)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Portuguese",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(hesap|adres|kimlik\\sdoğrulama|yetkilendirme|giriş|oturum\\saç|kaydol|kayıt)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Turkish",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(konto|adres|uwierzytelnianie|autoryzacja|zaloguj|logowanie|zarejestruj|rejestracja)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Polish",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(account|adres|authenticatie|autorisatie|inloggen|aanmelden|registreren)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Dutch",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(účet|adresa|ověření|autorizace|přihlásit|přihlášení|registrace|registrovat)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Czech",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(tài\\skhoản|địa\\schỉ|xác\\sthực|ủy\\squyền|đăng\\snhập|đăng\\ský)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Vietnamese",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(fiók|cím|hitelesítés|engedélyezés|bejelentkezés|belépés|regisztráció)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Hungarian",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(konto|adress|autentisering|auktorisering|logga\\sin|registrera)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Swedish",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(cont|adresă|autentificare|autorizare|conectare|autentifică|înregistrare)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Romanian",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(akun|alamat|autentikasi|otorisasi|masuk|login|daftar|registrasi)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Indonesian",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(účet|adresa|overenie|autorizácia|prihlásiť|prihlásenie|registrácia|registrovať)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Slovak",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(konto|adresse|godkendelse|autorisation|log\\sind|tilmeld)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Danish",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(tili|osoite|todennus|valtuutus|kirjaudu|rekisteröidy)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Finnish",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(konto|adresse|autentisering|autorisasjon|logg\\sinn|registrer)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Norwegian",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(account|address|pagpapatunay|awtorisasyon|mag-log\\sin|mag-sign\\sin|mag-sign\\sup)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Tagalog",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\b(обліковий\\sзапис|адреса|автентифікація|авторизація|увійти|зареєструватися|реєстрація)\\b",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Ukrainian",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "계정|주소|인증|권한|로그인|로그\\s?인|가입|회원가입",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Korean",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "账户|帳戶|地址|认证|認證|授权|授權|登录|登錄|注册|註冊",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Chinese",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "アカウント|住所|認証|承認|ログイン|サインイン|サインアップ",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Japanese",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "खाता|पता|प्रमाणीकरण|प्राधिकरण|लॉग\\sइन|साइन\\sइन|साइन\\sअप",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Hindi",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "حساب|عنوان|مصادقة|تفويض|تسجيل\\sالدخول|تسجيل|إنشاء\\sحساب",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Language":  "Arabic",
+        "IsSensitivityCheck":  true,
+        "RequireProtectedField":  true,
+        "Notes":  "Login"
+    },
+    {
+        "ElementName":  "\\S+@\\S+\\.\\S+",
+        "IsEnabled":  false
+    },
+    {
+        "Moniker":  "figma\\.exe",
+        "ElementName":  "grammarly-figma-plugin",
+        "ClassName":  "grammarly-figma-plugin",
+        "AccClass":  "grammarly-figma-plugin",
+        "IgnoreEmptyDiv":  true,
+        "IsEnabled":  true,
+        "Notes":  "PBUG: Enable Llama inside the Grammarly Figma plugin in the native app. Native Figma exposes the plugin editor via UI Automation only (no IAccessible2), so \u0027grammarly-figma-plugin\u0027 is the UIA ClassName, not an IA2 AccClass. ClassName matches it for the native app; AccClass keeps the IA2 (browser-style) path working. ElementName is set to the same token only to route matching into the element-level (ClassName/AccClass) checks -- it intentionally does not match the element\u0027s empty UIA Name or its dynamic doc-*-node-* AutomationId, so it never matches Figma canvas elements. Without a non-null ElementName, an AccClass-only record checks IA2 alone and never the UIA ClassName."
+    },
+    {
+        "Domain":  "figma\\.com",
+        "AccClass":  "grammarly-figma-plugin",
+        "IgnoreEmptyDiv":  true,
+        "IsEnabled":  true
+    },
+    {
+        "Moniker":  "figma\\.exe",
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "figma\\.com",
+        "IsEnabled":  false
+    },
+    {
+        "Moniker":  "chatgpt\\.exe",
+        "ElementName":  "\\bCodex\\b",
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "Codex composer name contains the personal-info token \u0027code\u0027. Match the product name so the wording can change. Other fields in the app keep sensitivity checks."
+    },
+    {
+        "Domain":  "chatgpt\\.com",
+        "AccClass":  "ProseMirror",
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "ChatGPT composer is a ProseMirror editor. The class stays when the placeholder and automation id change."
+    },
+    {
+        "Domain":  "chatgpt\\.com",
+        "ElementName":  "\\bChatGPT\\b|\\bcomposer\\b|\\bprompt\\b",
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "Page title contains \u0027code\u0027 and the composer automation id contains \u0027mobile\u0027. Match the product name or a composer/prompt id so the exact title and id can change. Other chatgpt.com fields keep sensitivity checks."
+    },
+    {
+        "Domain":  "chatgpt\\.com",
+        "IgnoreEmptyDiv":  true,
+        "RequiredEnabledExperimentationGate":  "llama_win_chat_gpt_ignore_empty_div",
+        "Notes":  "ChatGPT ProseMirror editor has ancestor with zero height causing highlights to fail"
+    },
+    {
+        "Moniker":  "(grammarlyforwindows|microsoftedge|microsoftedgecp)\\.exe",
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "((last|nord)pass|1password|passwords\\.google|dashlane|bitwarden|keepersecurity)\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Popular password managers domains"
+    },
+    {
+        "Domain":  "(^|\\.)docs\\.superhuman\\.com$",
+        "IsEnabled":  false,
+        "RequiredEnabledExperimentationGate":  "llama_win_disable_superhuman_docs",
+        "Notes":  "LMA-8849: Disable integration on docs.superhuman.com while the gate is enabled."
+    },
+    {
+        "Moniker":  "superhuman docs\\.exe",
+        "IsEnabled":  false,
+        "RequiredEnabledExperimentationGate":  "llama_win_disable_superhuman_docs",
+        "Notes":  "Disable integration in the Superhuman Docs desktop app while the gate is enabled; highlights are misplaced there."
+    },
+    {
+        "Moniker":  "chrome.exe",
+        "Domain":  "hdokiejnpimakedhajhdlcegeplioahd|nngceckbapebfimnlniiiahkandclblb|fdjamakpfbbddfjaooikfcpapjohcfmg|aeblfdkhhhdcdjpifhhbdiojplfjncoa|khgocmkkpikpnmmkgmdnfckapcdkgfaf",
+        "IsEnabled":  false,
+        "Notes":  "Chrome extensions for LastPass, Bitwarden, Dashlane and 1Password (2 for diff versions)"
+    },
+    {
+        "Moniker":  "(1password|nordpass|bitwarden|keeperpasswordmanager|keepass)\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "Popular password manager apps"
+    },
+    {
+        "Moniker":  "pingmonitor.exe",
+        "IsEnabled":  false,
+        "Notes":  "Custom monitoring tool, that intercepts focus"
+    },
+    {
+        "Moniker":  "arts.exe",
+        "IsEnabled":  false,
+        "Notes":  "Custom internal app, crashes with Grammarly"
+    },
+    {
+        "Moniker":  "antigravity\\.exe",
+        "IsEnabled":  false,
+        "RequiredEnabledExperimentationGate":  "llama_win_disable_antigravity",
+        "Notes":  "LMA-7532 Disable Grammarly in Antigravity"
+    },
+    {
+        "Domain":  "1ty\\.me|onetimesecret\\.com|password\\.link|saltify\\.io",
+        "IsEnabled":  false,
+        "Notes":  "One-time link sites"
+    },
+    {
+        "Domain":  "^docs\\.google\\.com\\.?$",
+        "UrlRegex":  "^https?://docs\\.google\\.com\\.?/presentation(?:/|[?#]|$)",
+        "IsEnabled":  false,
+        "RequiredEnabledExperimentationGate":  "llama_win_application_integration_disabled_reason",
+        "DeferUntilElementLookup":  true,
+        "Notes":  "Google Slides exposes a hidden editing target, but native slide text reading and insertion are unsupported. Resolve the element before rejecting editing so the context-extraction policy can clear any previous page context."
+    },
+    {
+        "Domain":  "docs\\.google\\.com",
+        "UrlRegex":  "https:\\/\\/docs\\.google\\.com\\/document\\/d.*",
+        "ShowActivateNotification":  true,
+        "DefaultPosition":  {
+                                "Corner":  "BottomRight",
+                                "Offset":  "-121,-94"
+                            },
+        "IsEnabled":  true,
+        "Notes":  "Desktop Integration can\u0027t work in GDocs - show notification to activate browser extension there"
+    },
+    {
+        "Domain":  "docs\\.google\\.com",
+        "ElementName":  "Google Docs",
+        "CheckAncestors":  true,
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "app.grammarly.com",
+        "UrlRegex":  "/llama-onboarding",
+        "IsEnabled":  true,
+        "DefaultPosition":  {
+                                "Corner":  "BottomRight",
+                                "Offset":  "-125, -125"
+                            }
+    },
+    {
+        "Domain":  "app.grammarly.com",
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "coda.grammarly.com",
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "coda.ppgr.io",
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "coda.qagr.io",
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "demo.grammarly.com",
+        "IsEnabled":  false
+    },
+    {
+        "Domain":  "(.*\\.)scripted\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner. Partner integration Text Editor SDK."
+    },
+    {
+        "Domain":  "dashboard.doppler.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner."
+    },
+    {
+        "Domain":  "celtx\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3557 Blocked by website developer request."
+    },
+    {
+        "Domain":  "(englishtest\\.duolingo\\.com|englishtest\\.duolingo\\.cn)",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3596 Blocked by website developer request."
+    },
+    {
+        "Domain":  "gamma.app",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner."
+    },
+    {
+        "Moniker":  "winword\\.exe",
+        "ElementName":  "(Document|Documento|Dokument|Документ|Belge|Dokumen|Tài liệu|Dokumentum|Asiakirja|文档|文書|ドキュメント|문서)\\d+",
+        "ShowGButtonAfterSymbols":  "0",
+        "DefaultPosition":  {
+                                "Corner":  "BottomRight",
+                                "Offset":  "-30, -35"
+                            }
+    },
+    {
+        "Moniker":  "winword.exe",
+        "IgnoreSensitivityCheck":  true,
+        "UIAutomationViewportSize":  10,
+        "UIAutomationViewportMarginSize":  1
+    },
+    {
+        "Moniker":  "winword\\.exe",
+        "IsEnabled":  false,
+        "ElementName":  "Search Box",
+        "ClassName":  "SearchEditBox",
+        "RequiredEnabledExperimentationGate":  "llama_win_word_disable_in_search_box",
+        "Notes":  "PBUG-1748"
+    },
+    {
+        "Moniker":  "msedgewebview2\\.exe",
+        "ParentExecutableName":  "winword.exe",
+        "IgnoreEmptyDiv":  true,
+        "IsEnabled":  true,
+        "ElementName":  "Prompt",
+        "Domain":  "resources\\.office\\.net",
+        "IA2IgnoreSelfForVisibility":  true,
+        "IgnoreParentsVisibility":  true,
+        "Notes":  "PBUG-1882: fix viewport calculation for copilot chat in MS Word"
+    },
+    {
+        "Moniker":  "screenclippinghost\\.exe",
+        "IsEnabled":  false,
+        "Description":  "Windows Snipping Tool exclusion PBUG-213"
+    },
+    {
+        "Moniker":  "Word Online",
+        "IgnoreSensitivityCheck":  true,
+        "UseParentVisibleBounds":  {
+                                       "IA2AttributeRegex":  ".*WACInteractiveView.*"
+                                   },
+        "Notes":  "The page rectangle sits above the ribbon and collapses highlight bounds. Use the interactive view."
+    },
+    {
+        "Moniker":  "PowerPoint Online",
+        "IgnoreSensitivityCheck":  true
+    },
+    {
+        "Moniker":  "onenoteim\\.exe|onenote\\.exe",
+        "IgnoreSensitivityCheck":  true,
+        "SingleParagraphUIAutomationWordLimit":  1000
+    },
+    {
+        "Moniker":  "(excel|powerpnt)\\.exe",
+        "ElementName":  "\\..*-  (Read-Only|Solo lectura|Только для чтения|Lecture seule|Schreibgeschützt|Sola lettura|Somente Leitura|Salt Okunur|Tylko do odczytu|Alleen-lezen|Jen pro čtení|Chỉ đọc|Csak olvasható|Skrivskyddad|Doar citire|Baca Saja|Len na čítanie|Skrivebeskyttet|Vain luku|Skrivebeskyttet|読み取り専用|읽기 전용|只读|唯讀|للقراءة فقط|केवल पढ़ने के लिए)  -.*|-  (Read-Only|Solo lectura|Только для чтения|Lecture seule|Schreibgeschützt|Sola lettura|Somente Leitura|Salt Okunur|Tylko do odczytu|Alleen-lezen|Jen pro čtení|Chỉ đọc|Csak olvasható|Skrivskyddad|Doar citire|Baca Saja|Len na čítanie|Skrivebeskyttet|Vain luku|Skrivebeskyttet|読み取り専用|읽기 전용|只读|唯讀|للقراءة فقط|केवल पढ़ने के लिए)$",
+        "IsEnabled":  false
+    },
+    {
+        "Moniker":  "excel\\.exe",
+        "ElementName":  "CellEdit",
+        "MinElementWidth":  0,
+        "IsEnabled":  true,
+        "UseParentVisibleBounds":  {
+                                       "Name":  "^(Grid|Cuadrícula|Сетка|Grille|Raster|Griglia|Grade|Kılavuz|Siatka|Rács|Rutnät|Grilă|Kisi|Mriežka|Gitter|Ruudukko|Lưới|Tala|グリッド|그리드|网格|格線|ग्रिड|شبكة)$",
+                                       "UIAutomationControlType":  "50028"
+                                   },
+        "Notes":  "Office 365. Enable inside the cell if it\u0027s in edit mode."
+    },
+    {
+        "Moniker":  "excel\\.exe",
+        "ElementName":  "Edit Item",
+        "MinElementWidth":  0,
+        "IsEnabled":  true,
+        "UseParentVisibleBounds":  {
+                                       "UIAutomationControlType":  "50033"
+                                   },
+        "Notes":  "Office 2016. Enable inside the cell if it\u0027s in edit mode.(see the next rule about the Grid cells in general)."
+    },
+    {
+        "Moniker":  "excel\\.exe",
+        "ElementName":  "Grid",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Notes":  "Disable by default in grid cells, while they are in \u0027read\u0027 mode (this rule may be overridden by the CellEdit rule above)."
+    },
+    {
+        "Moniker":  "powerpnt\\.exe",
+        "IsEnabled":  true,
+        "IgnoreSensitivityCheck":  true,
+        "MinElementWidth":  0,
+        "UseParentVisibleBounds":  {
+                                       "Name":  "^(Slide|Diapositiva|Слайд|Diapositive|Folie|Slayt|Slajd|Dia|Snímek|Trang trình bày|Bild|Diapozitiv|Snímka|Lysbilde|Slide|スライド|슬라이드|幻灯片|投影片|स्लाइड|شريحة)$",
+                                       "UIAutomationControlType":  "50033"
+                                   }
+    },
+    {
+        "Domain":  "mail\\.google\\.com",
+        "ElementName":  "^(Message Body|Cuerpo del mensaje|Тело сообщения|Corps du message|Nachrichtentext|Corpo del messaggio|Corpo da mensagem|Mesaj Gövdesi|Treść wiadomości|Berichttekst|Tělo zprávy|Nội dung tin nhắn|Üzenettörzs|Meddelandetext|Corpul mesajului|Isi Pesan|Telo správy|Beskedtekst|Viestikenttä|Meldingstekst|Katawan ng Mensahe|Тіло повідомлення|메시지 본문|邮件正文|郵件內文|メッセージ本文|संदेश का मुख्य भाग|نص الرسالة)",
+        "IgnoreSensitivityCheck":  true,
+        "DefaultPosition":  {
+                                "Corner":  "TopRight",
+                                "Offset":  "10, -20"
+                            }
+    },
+    {
+        "Domain":  "mail\\.google\\.com",
+        "ElementName":  "^(subject|asunto|тема|objet|betreff|oggetto|assunto|konu|temat|onderwerp|předmět|chủ đề|tárgy|ämne|subiect|subjek|predmet|emne|aihe|emne|paksa|тема|제목|主题|主題|件名|विषय|الموضوع)",
+        "IgnoreHtmlInputField":  false,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "Allow \u0027subject\u0027 field in Gmail"
+    },
+    {
+        "Domain":  "outlook\\.(live|office(365)?)\\.com",
+        "ElementName":  "^(Add a subject|Agregar un asunto|Додайте тему|Ajouter un objet|Betreff hinzufügen|Aggiungi un oggetto|Adicionar um assunto|Konu ekle|Dodaj temat|Onderwerp toevoegen|Přidat předmět|Thêm chủ đề|Tárgy hozzáadása|Lägg till ämne|Adăugați un subiect|Tambahkan subjek|Pridať predmet|Tilføj et emne|Lisää aihe|Legg til emne|Magdagdag ng paksa|Додайте тему|제목 추가|添加主题|新增主旨|件名を追加|विषय जोड़ें|إضافة موضوع)",
+        "IgnoreHtmlInputField":  false,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "Allow \u0027subject\u0027 field in Outlook"
+    },
+    {
+        "Domain":  "app\\.teachermade\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Deactivated upon owner request. LMA-3330"
+    },
+    {
+        "Domain":  "activedisclosure\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Deactivated upon owner request. LMA-3310"
+    },
+    {
+        "Domain":  "devbstaging\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Deactivated upon owner request. LMA-3310"
+    },
+    {
+        "Moniker":  "outlook.exe",
+        "ClassName":  "_WwG",
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "Outlook\u0027s email body element may be named after the email subject. Its parent elements may also contain some sensitive words e.g. in user\u0027s email address being present in parent element\u0027s name. We don\u0027t want to disable the integration in email body, so we ignore the sensitivity checks there."
+    },
+    {
+        "Moniker":  "outlook.exe",
+        "ElementName":  "TechHit SimplyFile",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Notes":  "PBUG-284: Plugin TechHit SimplyFile is not supported."
+    },
+    {
+        "Domain":  "github\\.com",
+        "ElementName":  "read-only.*",
+        "IsEnabled":  false,
+        "Notes":  "Disable in GitHub read-only text fields"
+    },
+    {
+        "Domain":  "web\\.whatsapp\\.com",
+        "ElementName":  "[^\\S\\s]",
+        "AccTag":  "^footer$",
+        "CheckAncestors":  true,
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "Enable Llama only in the chat composer, selected structurally by its \u003cfooter\u003e ancestor instead of localized placeholder text (the previous 30-locale ElementName list needed repeated repair - see PBUG-3310, PBUG-3356 - and its AccClass list no longer matches WhatsApp Web at all). ElementName=[^\\S\\s] is a never-match regex to bypass the ElementName==null early-return in MatchRecord so AccTag becomes the actual selector (same pattern as the LINE rule). IgnoreEmptyDiv skips zero-height ancestor divs so highlights can be drawn. Covers both web.whatsapp.com in a browser and the WhatsApp Desktop msedgewebview2 host."
+    },
+    {
+        "Domain":  "web\\.whatsapp\\.com",
+        "MustHaveClassInAncestorsRegexp":  "^x4jvfs4$",
+        "AccClass":  "^x1hx0egp$",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "PBUG-3590: Enable the file preview caption without relying on its localized accessible name. The caption editor has class x1hx0egp under the media-preview class x4jvfs4; copyable-area alone also includes phone number and status fields."
+    },
+    {
+        "Domain":  "web\\.whatsapp\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Disable Llama everywhere else in WhatsApp: username, group subject, call number entry and other dialog inputs. Without this catch-all the global default at the end of the file enables Grammarly in every WhatsApp field."
+    },
+    {
+        "Domain":  "app\\.slack\\.com",
+        "IsEnabled":  true,
+        "IgnoreSensitivityCheck":  true,
+        "DefaultPosition":  {
+                                "Corner":  "TopRight",
+                                "Offset":  "-20, -25"
+                            }
+    },
+    {
+        "Moniker":  "slack\\.exe",
+        "IsEnabled":  true,
+        "IgnoreSensitivityCheck":  true,
+        "DefaultPosition":  {
+                                "Corner":  "TopRight",
+                                "Offset":  "-20, -25"
+                            },
+        "AncestorAttributesRegex":  "^(?!.*class:sr-only).*$"
+    },
+    {
+        "Domain":  "mail\\.superhuman\\.com",
+        "ClassName":  "ComposeForm-subject",
+        "IgnoreHtmlInputField":  false,
+        "IsEnabled":  true
+    },
+    {
+        "Moniker":  "superhuman\\.exe",
+        "ClassName":  "ComposeForm-subject",
+        "IgnoreHtmlInputField":  false,
+        "IsEnabled":  true
+    },
+    {
+        "Moniker":  "discord\\.exe",
+        "IsEnabled":  true
+    },
+    {
+        "Domain":  "(.*\\.)?discord\\.com",
+        "IsEnabled":  true
+    },
+    {
+        "Moniker":  "(start11|start11_64)\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3816: Llama causes Start11.exe to crash with Explorer.exe when both apps are used together."
+    },
+    {
+        "Moniker":  "telegram.exe",
+        "ElementName":  "Enter message|Escribe un mensaje|Введите сообщение|Saisissez un message|Nachricht eingeben|Scrivi un messaggio|Digite uma mensagem|Bir mesaj yazın|Wpisz wiadomość|Typ een bericht|Napište zprávu|Nhập tin nhắn|Írjon üzenetet|Skriv ett meddelande|Introduceți mesajul|Ketik pesan|Napíšte správu|Skriv en besked|Kirjoita viesti|Skriv en melding|Mag-type ng mensahe|Введіть повідомлення|메시지 입력|输入消息|輸入訊息|メッセージを入力|संदेश लिखें|اكتب رسالة",
+        "ClassName":  "^(Ui::BoxContent|QWidget)$",
+        "CheckAncestors":  true,
+        "IsEnabled":  false,
+        "Notes":  "In Telegram enable Llama only inside message field. Ignore input fields in various settings."
+    },
+    {
+        "Moniker":  "telegram.exe",
+        "ClassName":  "^(Ui::InputField|QTextEdit)$",
+        "CheckAncestors":  true,
+        "IsEnabled":  true,
+        "Notes":  "In Telegram enable Llama only inside message field"
+    },
+    {
+        "Moniker":  "telegram.exe",
+        "IsEnabled":  false,
+        "Notes":  "In Telegram enable Llama only inside message field"
+    },
+    {
+        "Moniker":  "line\\.exe",
+        "ElementName":  "[^\\S\\s]",
+        "ClassName":  "^(AutoSuggestTextArea)$",
+        "IsEnabled":  true,
+        "Notes":  "PBUG-2459 / LMA-8296: In LINE enable Llama only inside message input field. ElementName=[^\\S\\s] is a never-match regex to bypass the ElementName==null early-return in MatchRecord, allowing ClassName to be the actual selector (same pattern as WhatsApp XAML rule)."
+    },
+    {
+        "Moniker":  "line\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "PBUG-2459 / LMA-8296: In LINE disable Llama for all other elements"
+    },
+    {
+        "Moniker":  "viber.exe",
+        "IsEnabled":  false,
+        "Notes":  "Currently Viber is not supported. The focus event is not risen when switching between text fields."
+    },
+    {
+        "Domain":  "facebook.com",
+        "UseAlternativeTextChangedEvents":  true,
+        "CheckAncestors":  true,
+        "IgnoreParentsVisibility":  true,
+        "MinElementWidth":  90,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "Facebook Messenger pop-up is too small for default width options. Cannot rely on element\u0027s\u0027 name as it depends on the language used."
+    },
+    {
+        "Domain":  "(.*\\.)?coda\\.io",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "IgnoreReadonlyContent":  true,
+        "MinElementWidth":  90,
+        "AncestorAttributesRegex":  "class:\\s*(?:[^\\s;]*\\s)?(kr-document-root|kr-canvas-section-viewport|kr-slate-editor-is-directly-focused)(?:\\s[^\\s;]*)?;",
+        "Notes":  "Ignore empty div in the computation of visible bounds. "
+    },
+    {
+        "Moniker":  "firefox\\.exe",
+        "UseAlternativeTextChangedEvents":  true,
+        "ContextFeatures":  [
+                                "CheetahRestricted"
+                            ]
+    },
+    {
+        "Moniker":  "skype\\.exe",
+        "UseAlternativeTextChangedEvents":  true,
+        "Notes":  "LMA-2452 Alert counter is not updated after deleting text from chat text field on Skype"
+    },
+    {
+        "Domain":  "(facebook\\.com|messenger\\.com)",
+        "Moniker":  "firefox\\.exe",
+        "AncestorAttributesRegex":  ".*class:(oo9gr5id lzcic4wl jm1wdb64 l9j0dhe7 gsox5hk5 mdldhsdk ii04i59q buofh1pr tw4czcav cehpxlet hpfvmrgz eg9m0zos|orhb3f3m h905i5nu jinzq4gt emzo65vh j83agx80 e5nlhep0 mrt03zmi ecm0bbzt h4z51re5 gvyehdmr mu0vl6fp msuhji6j iqy7zqfr rj1gh0hx cbu4d94t buofh1pr ni8dbmo4 ll8tlv6m b3i9ofy5 oo9gr5id flx89l3n dpja2al7 qiw3t3sk).*",
+        "Notes":  "LMA-1750: In Facebook Messenger pages, find the actually visible ancestor with the right bounds. Firefox is really particular about what elements it\u0027s reporting."
+    },
+    {
+        "Domain":  "(facebook\\.com|messenger\\.com)",
+        "Moniker":  ".*(?\u003c!firefox)\\.exe",
+        "AncestorAttributesRegex":  ".*class:(oo9gr5id lzcic4wl jm1wdb64 l9j0dhe7 gsox5hk5 mdldhsdk ii04i59q buofh1pr tw4czcav cehpxlet hpfvmrgz eg9m0zos|ecm0bbzt e5nlhep0 buofh1pr jq4qci2q a3bd9o3v iko8p5ub eg9m0zos ni8dbmo4 rq0escxv lexh0w6q).*",
+        "Notes":  "LMA-552: In Facebook Messenger pages, find the actually visible ancestor with the right bounds."
+    },
+    {
+        "Domain":  "facebook.com",
+        "Moniker":  "firefox.exe",
+        "ViewportStrategySiblingsInAncestor":  {
+                                                   "MarginTop":  20,
+                                                   "MarginBottom":  40,
+                                                   "AttributesRegexString":  "^.*tag:form;.*$"
+                                               },
+        "Notes":  "Calculate viewport base on the siblings"
+    },
+    {
+        "Domain":  "twitter.com",
+        "AncestorAttributesRegex":  ".*class:([\\w\\d-_]+\\s+)*public-DraftEditor-content.*",
+        "Notes":  "LMA-1733: On Twitter, find the right ancestor for compose or reply textbox."
+    },
+    {
+        "Domain":  "groupgreeting.com",
+        "AncestorAttributesRegex":  "^(?!.*(id:sign\\-right\\-content|class:col\\-lg\\-5)).*$",
+        "Notes":  "LMA-745: In GroupGreeting, ignore the ancestors with incorrect bounds"
+    },
+    {
+        "Domain":  "linkedin.com",
+        "Moniker":  "firefox.exe",
+        "MustHaveClassInAncestorsRegexp":  "^artdeco\\-modal__content.*",
+        "AncestorAttributesRegex":  "^(?!.*(id:artdeco-modal-outlet)).*",
+        "ViewportStrategySiblingsInAncestor":  {
+                                                   "MarginBottom":  20,
+                                                   "AttributesRegexString":  ".*class:artdeco\\-modal__content.*"
+                                               },
+        "Notes":  "LMA-1101: In LinkedIn on Firefox, ignore the ancestor with incorrect bounds; LMA-2997:  Underlines are visible outside the Create Post field"
+    },
+    {
+        "Domain":  "linkedin.com",
+        "Moniker":  "firefox.exe",
+        "MustHaveClassInAncestorsRegexp":  "^msg\\-form.*",
+        "ViewportStrategySiblingsInAncestor":  {
+                                                   "MarginBottom":  20,
+                                                   "AttributesRegexString":  ".*id:msg\\-form.*"
+                                               },
+        "Notes":  "LMA-3496: Underlines are visible outside the Message field"
+    },
+    {
+        "Domain":  "linkedin.com",
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "LMA-4035: Highlights not showing in LinkedIn\u0027s message field"
+    },
+    {
+        "Domain":  "outlook.live.com|outlook.office365.com",
+        "Moniker":  "firefox.exe",
+        "AncestorAttributesRegex":  "^(?!.*(xml-roles:main)).*$",
+        "Notes":  "LMA-1108: In Outlook on Firefox, ignore the ancestor with zero height"
+    },
+    {
+        "Domain":  ".*\\.larksuite\\.com",
+        "UrlRegex":  "(/docs/|/wiki/)",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "UseParentVisibleBounds":  {
+                                       "UIAutomationControlType":  "50030",
+                                       "IA2AttributeRegex":  "^(?=.*(class:app\\-main\\-container|tag:body)).*$"
+                                   },
+        "DefaultPosition":  {
+                                "Corner":  "BottomRight",
+                                "Offset":  "-112,-115"
+                            },
+        "Notes":  "Ignore empty div in the computation of visible bounds. G-button position is stick to the whole document, instead of text field"
+    },
+    {
+        "Domain":  ".*\\.larksuite\\.com",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "IgnoreReadonlyContent":  true,
+        "Notes":  "Ignore empty div in the computation of visible bounds. "
+    },
+    {
+        "Moniker":  "lark.exe",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "Ignore empty div in the computation of visible bounds"
+    },
+    {
+        "Domain":  ".*\\.zendesk\\.com",
+        "IgnoreEmptyDiv":  true,
+        "AncestorAttributesRegex":  ".*class:.*rich-text-container.*",
+        "UseAlternativeTextChangedEvents":  true,
+        "IgnoreParentsVisibility":  true,
+        "Notes":  "Configuration for the correct highlights viewport and visibility calculations"
+    },
+    {
+        "Domain":  "recruiterflow\\.com",
+        "ElementName":  "^tinymce$",
+        "IgnoreEmptyDiv":  true,
+        "IgnoreParentsVisibility":  true,
+        "Notes":  "TinyMCE iframe editor has parent elements with zero height, causing visible bounds to be clipped incorrectly"
+    },
+    {
+        "Domain":  "^(.*\\.)?plextrac\\.com$|^tm\\.optiv\\.com$",
+        "AccClass":  "ck-editor__editable_inline",
+        "IgnoreEmptyDiv":  true,
+        "IgnoreParentsVisibility":  true,
+        "Notes":  "PBUG-3498: PlexTrac report editor (CKEditor 5 inline) has zero-height wrappers that clip the highlight viewport, so no underlines are painted. Covers plextrac.com plus custom tenant hosts such as tm.optiv.com - add new tenant domains to the Domain pattern."
+    },
+    {
+        "Domain":  "gigwebapp\\.guard\\.com",
+        "AccClass":  "mce-content-body",
+        "IsEnabled":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "TinyMCE editor sits beneath an ancestor element named \u0027ASC Conversations\u0027 which matches the auth-field sensitivity blocklist, causing a false-positive block. Ignore sensitivity checks to allow Grammarly to activate in this editor."
+    },
+    {
+        "Domain":  "gigwebapp\\.guard\\.com",
+        "AccClass":  "GTtextArea",
+        "IsEnabled":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "Email text area in gigwebapp has AutomationId=\u0027EmailText\u0027 which false-positively matches the \u0027email\u0027 keyword in the Personal Info sensitivity rule, blocking Grammarly from attaching to this editable textarea."
+    },
+    {
+        "Domain":  ".*\\.lightning\\.force\\.com",
+        "ElementName":  "^email body$",
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "PBUG-1087 Llama does not activate in Salesforce or highlights are missing."
+    },
+    {
+        "Domain":  ".*\\.lightning\\.force\\.com",
+        "IgnoreEmptyDiv":  true,
+        "IgnoreParentsVisibility":  true,
+        "AncestorAttributesRegex":  "(^(?!.*(slds\\-docked_container)).*$)|(class:[^;]*(slds-input|slds-textarea|cke_editable)[^;*])",
+        "Notes":  "PBUG-1087 Llama does not activate in Salesforce or highlights are missing."
+    },
+    {
+        "Domain":  "latticehq.com",
+        "AncestorAttributesRegex":  "^(?!.*(display:block;tag:div;class:chakra-portal;text-align:left;)).*$",
+        "Notes":  "LMA-1394: In Lattice, ignore the ancestor with zero height"
+    },
+    {
+        "Domain":  "^protect\\.citizen\\.com|protect\\.staging\\.sp0n\\.io$",
+        "ElementName":  "^title$",
+        "IgnoreHtmlInputField":  false,
+        "Notes":  "Allow \u0027title\u0027 field in protect.citizen.com"
+    },
+    {
+        "Moniker":  "(rhino|ssms|WindowsTerminal|code)\\.exe",
+        "IsEnabled":  false,
+        "Note":  "Disable in apps, where suggestions are not relevant"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ed\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?zenali\\.grammarly\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?staging\\.tapwage\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?test-app\\.taprecruit\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.taprecruit\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?hootsuite\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?codesandbox\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?texteditor\\.nsspot\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?jsbin\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?jsfiddle\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?imperavi\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?usecanvas\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?anagram\\.(grammarly|gnlp)\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?emailoctopus\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?sendsonar\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?psys\\.trinetsolutions\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?stripe\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?htmltohaml\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?s4tgroup\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?thequill\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?invisionapp\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?kaiten\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?spanishdict\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?virdocs\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?buckeyeinternational\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?tripoto\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?yandex-team\\.ru",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?resend\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?greenvelope\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mypinpointe\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?email\\.everyaction\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?email\\.ngpvan\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?gnar\\.grammarly\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myconnectwise\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?pagalguy\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?gnar2\\.grammarly\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?client-bank\\.privatbank\\.ua",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?stage-app\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?keyboardingonline\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?endue\\.me",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?agilezen\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?percolate\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?quill\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?homerun\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?remind\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?send\\.advisorhubinc\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?send\\.dwo\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?send\\.kmimedia\\.ca",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?send\\.livingwaters\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?email\\.losasso\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?send\\.marylandlocaldeals\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?news\\.miamidadearts\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?nikonmetrology\\.pptsend01\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?direct\\.pearson\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?news\\.promega\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?vernon\\.pptsend01\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mailing02\\.xpressbetonline\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.classeur\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?studystack\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?thrivetrm\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?siro\\.netscan\\.cc",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?noisli\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?easysendy\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?emaze\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?denali-fb\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?denali-local\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?sitefinity\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bold\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.qagr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.ppgr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?feedblitz\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.zaius\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?interviewme\\.pl",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?uptowork\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?daphnis\\.wbnusystem\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?typeset\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mixpanel\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?krypton\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mynewsletterbuilder\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?success\\.planview\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?kriyadocs\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?jangomail\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?aweber\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?dentist\\.toothpic\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ultracamp\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?airstory\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?yourtutor\\.com\\.au",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?clk9\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?denali-local\\.qagr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?denali-local\\.ppgr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myguestlist\\.com\\.au",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myguestlist\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?1brd\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myskillsolutions\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?eleadcrm\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?forddirectcrm\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?writeandimprove\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?calltrackingmetrics\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?phacility\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?phabricator\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?roompact\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bostonlogic\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?qutee\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?authorreach\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?lastpass\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?writerduet\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?novatechset\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?editgenie\\.novatechset\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?casper\\.novatechset\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.landinglion\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?studiosity\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bear\\.bytedance\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?docs\\.bytedance\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?venue360\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?venue360saas\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?venue360\\.me",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.productive\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?fundmetric\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?travefy\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?writesaver\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?wyborcza\\.pl",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?activeclassroom\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?active\\.socialstudies\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.frontspin\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?appng\\.frontspin\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ks1101\\.kenshoo\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?zala\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.zala\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ocdlab\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?xmpiecloud\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?xmcircle\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?showingdesk\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?showingtime\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?wearedeveloper\\.ml",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?writersolo\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?goletrax\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bigbiller\\.topechelon\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bb3\\.topechelon\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?blue\\.bbb\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bluebbb\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.maventus\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?dev\\.maventus\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?interim\\.maventus\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?confluence\\.selectel\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?apperio\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?paystand\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?paystand\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?dev-mailing-online\\.click2mail\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?hydroflask\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ovrture\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?clr\\.events",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?clearbookings\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?zety\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?codequest\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?daknoadmin\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?oxo\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?revlonhairtools\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bedheadstyling\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?goldnhothair\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bidorbuy\\.co\\.za",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?my\\.pandle\\.co\\.uk",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?foundersuite\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.lehigh\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?yoursite\\.pacific\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.emory\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?penbay\\.ovrture\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.wellesley\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.chop\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.ovrture\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?portal\\.mainehealth\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.buffalo\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.usna\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.misericordia\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.albany\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?impact\\.tulane\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?philanthropy\\.vcu\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.ucsf\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?impact\\.virginia\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.msu\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.childrenshospital\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?one\\.ovrture\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?moodle-2017-2018\\.fullerton\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?moodle-2018-2019\\.fullerton\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysoledu\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?qeios\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bidpal\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?onecause\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?onecause\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?eg2\\.novatechset\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?nationalcapital\\.co\\.nz",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?advancement\\.buffalo\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.msu\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?fetchsome\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?sonia\\.pep\\.navitas\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?applepiecapital\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?d16dnhlej6sizh\\.cloudfront\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?coderpad\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?webtexts\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.evms\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.nku\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.kgi\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bubble\\.is",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?prtg\\.paessler\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?tests\\.gracor\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?tests\\.gracor\\.us",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bowwe\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?portfoliobox\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bookmark\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.hatchbuck\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?melia\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?use\\.ob3\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.fuseworksmedia\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?developerhub\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?developerhub\\.dev",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?moodle-(\\d{4})-(\\d{4})\\.fullerton\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "moodle-2019-2020.fullerton.edu and similar. Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?tettra\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?sendy\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?secure-dock\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?teehag\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?clubhouse\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?burlington\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.psu\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.bucknell\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.ncsu\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?usps\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?paper\\.id",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?samegoal\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?riffreporter\\.de",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?dovetailapp\\.com”",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?energytoolbase\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?pidoco\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?referralrock\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.referralrock\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?staging-rr\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.staging-rr\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ce\\.eleyo\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?reg\\.eleyo\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.dickinson\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?connect\\.childrenshospital\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myphilanthropy\\.tcu\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.susqu\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.mdanderson\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.stanford\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.tophat\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app-ca\\.tophat\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?jira\\.proact\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?jira\\.kmiservicehub\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?news\\.ycombinator\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bydzyne\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?investor\\.vanguard\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?lexicabulary\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.admin\\.bcm\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.ucdavis\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.suitedash\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?convertpages\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?sasustainability\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ui\\.proofit\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ui\\.proofit\\.grammarly\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ui\\.proofit\\.qagr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ui\\.proofit\\.ppgr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?researchgate\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myant\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?outreach\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?grid\\.is",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?destinationski\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?deviantart\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?juro\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?juro\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mycouncil\\.mvcc\\.vic\\.gov\\.au",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.getguru\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?slab\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?talk-me\\.ru",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bells\\.ai",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?minutes\\.tools\\.sap",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?taichungdesigner\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?plickers\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?plickers-dev\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?plickers-staging\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?plickers-beta\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.bc\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?mysite\\.earthjustice\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.mtech\\.edu",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?myimpact\\.oglebayfoundation\\.org",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?api\\.mtsobek\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?rds\\.tourcube\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?web\\.tourcube\\.net",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?trax\\.verbit\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?trax-qa\\.verbit\\.co",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?highfieldcore\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?demo\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?bertie\\.forbes\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.datapeople\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?speedwrite\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?walgreens\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?developer\\.grammarly\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?developer\\.ppgr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?developer\\.qagr\\.io",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?rolo\\.chat",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "the\\.slab\\.com",
+        "IsEnabled":  true,
+        "Notes":  "Enable only the.slab.com"
+    },
+    {
+        "Domain":  "(.*\\.)?slab\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?curro\\.myrecruit\\.co\\.za",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.pure360\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ebvaluate\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?exam\\.esatqualifications\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?semrush\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "tools.picsart.com",
+        "UrlRegex":  "/ad-maker",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?assessmentintelligence\\.co\\.uk",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?cocubes\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?navvyeducation\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?my\\.cvonline\\.me",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?my\\.onlineresume\\.us",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.contentfries\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "app.napkin.ai",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?dhiwise\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Moniker":  "tracklify.exe",
+        "IsEnabled":  false,
+        "Notes":  "Blocked because the host app is crashing"
+    },
+    {
+        "Moniker":  "trucking.exe",
+        "IsEnabled":  false,
+        "Notes":  "Blocked because the host app is crashing"
+    },
+    {
+        "Moniker":  "mdcs.exe",
+        "IsEnabled":  false,
+        "Notes":  "Blocked because the user has issue with this app. LMA-3895"
+    },
+    {
+        "Moniker":  "3dimagingsoftware.exe",
+        "IsEnabled":  false,
+        "Notes":  "Blocked because the user has issue with this app. LMA-3895"
+    },
+    {
+        "Moniker":  "PWimage.exe",
+        "IsEnabled":  false,
+        "Notes":  "Blocked because the user has issue with this app. LMA-3895"
+    },
+    {
+        "Moniker":  "mps.exe",
+        "IsEnabled":  false,
+        "Notes":  "Blocked because the host app is crashing. LMA-4251"
+    },
+    {
+        "Domain":  "(.*\\.)?.flowchat\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?manuscripts\\.ai",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3739 Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?infolex\\.lt",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3775 Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?evolvepreprod\\.cityandguilds\\.com",
+        "UrlRegex":  "/takeatest",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5960 Blocked by website developer request."
+    },
+    {
+        "Moniker":  "painter \\d{4} x\\d{2}\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "Blocked by request from the application owner. Example of app name is painter 2023 x64.exe"
+    },
+    {
+        "Moniker":  "Excel Online",
+        "IgnoreEmptyDiv":  true,
+        "MinElementWidth":  0,
+        "ContextFeatures":  [
+                                "CheetahRestricted"
+                            ]
+    },
+    {
+        "Domain":  "mail.yahoo.com",
+        "IsEnabled":  true,
+        "ContextFeatures":  [
+                                "CheetahRestricted"
+                            ],
+        "RequiredDisabledExperimentationGate":  "llama_win_enable_cheetah_yahoo_mail",
+        "Notes":  "Blocked cheetah on yahoo mail"
+    },
+    {
+        "Domain":  "(.*\\.)?drift\\.com",
+        "UseAlternativeTextChangedEvents":  true
+    },
+    {
+        "Domain":  "(.*\\.)?miro\\.com",
+        "IsEnabled":  false,
+        "Notes":  "Block miro.com until fix integration in the future"
+    },
+    {
+        "Moniker":  "miro.exe",
+        "IsEnabled":  false,
+        "Notes":  "Block Miro application until fix integration in the future"
+    },
+    {
+        "Moniker":  "obsidian.exe",
+        "IsEnabled":  true,
+        "Notes":  "LMA-8993 Enable Obsidian desktop app"
+    },
+    {
+        "Domain":  "(.*\\.)?glean\\.co",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3026 Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?genio\\.co",
+        "IsEnabled":  false,
+        "Notes":  "PBUG-2228 Blocked by request from website owner"
+    },
+    {
+        "Domain":  "b2b.epicentrk.ua",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3056 Blocked by request from website owner"
+    },
+    {
+        "Moniker":  "rip-sbl.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3056 Blocked by request from app owner"
+    },
+    {
+        "Moniker":  "cstone.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3104 Blocked by request from app owner"
+    },
+    {
+        "Moniker":  "descript.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3505 Blocked by request from app owner"
+    },
+    {
+        "Domain":  "(.*\\.)?nucleuslabs\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3141 Blocked by request from website owner"
+    },
+    {
+        "Domain":  ".*\\.eloqua\\.com",
+        "MinElementWidth":  0,
+        "IgnoreEmptyDiv":  true,
+        "IsEnabled":  true
+    },
+    {
+        "Moniker":  "teams\\.exe",
+        "UseAlternativeTextChangedEvents":  true,
+        "IgnoreReadonlyContent":  true,
+        "Notes":  "LMA-3451 MSTeams TextChanged event doesn\u0027t work in New chat window"
+    },
+    {
+        "Domain":  "teams\\.microsoft\\.com",
+        "IgnoreReadonlyContent":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "LMA-3787 When replying in MS Teams Llama flags mistakes in the message user is replying to"
+    },
+    {
+        "Domain":  "teams\\.microsoft\\.com",
+        "Moniker":  "msedgewebview2\\.exe",
+        "AncestorAttributesRegex":  ".*class:(ui-box|ck|ui-flex|fui-flex|fui-Primitive).*",
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "LMA-3770 New Teams has broken accessibility tree ancestors in the chat view"
+    },
+    {
+        "Domain":  "teams\\.live\\.com",
+        "Moniker":  "msedgewebview2\\.exe",
+        "AncestorAttributesRegex":  ".*class:(ui-box|ck|ui-flex|fui-flex|fui-Primitive).*",
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "PBUG-202 Teams for non-business user has different domain so it require separate options"
+    },
+    {
+        "Domain":  "(.*\\.)?heymarvin\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3444 Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?ngnexttest\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3477 Blocked by request from website owner"
+    },
+    {
+        "Moniker":  "msaccess\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3390 Blocked since it is causing issues with msaccess.exe. Temporary workaround until we find a proper fix for integration."
+    },
+    {
+        "Moniker":  "hotel\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3465 Block Llama on “Athena” ERP desktop app, requested by customer."
+    },
+    {
+        "Moniker":  "omtsreco\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3465 Block Llama on “Athena” ERP desktop app, requested by customer."
+    },
+    {
+        "Moniker":  "check_ver\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3465 Block Llama on “Athena” ERP desktop app, requested by customer."
+    },
+    {
+        "Moniker":  "CPOPM06\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3611 Block CPOPM06.exe in Integration Options"
+    },
+    {
+        "Domain":  "app.box.com",
+        "AncestorAttributesRegex":  ".*class:innerdocbody.*",
+        "Notes":  "LMA-3389: Take only one ancestor as many of them are positioned out of text box"
+    },
+    {
+        "Domain":  "app\\.clickup\\.com",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "LMA-4231: Ignore empty div in the computation of visible bounds."
+    },
+    {
+        "Moniker":  "clickup\\.exe",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "LMA-4231: Ignore empty div in the computation of visible bounds. This is a WebView based app."
+    },
+    {
+        "Domain":  ".*\\.wordpress\\.com",
+        "IgnoreEmptyDiv":  true,
+        "IsEnabled":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "Ignore empty div in the computation of visible bounds. Main Wordpress editor can have any words so we need to disable sensitivity checks."
+    },
+    {
+        "MustHaveClassInAncestorsRegexp":  "wp-admin",
+        "ClassName":  "^editor-visual-editor.*",
+        "CheckAncestors":  true,
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "PBUG-1380: Apply WordPress integration from above for instances not using wordpress.com domains."
+    },
+    {
+        "Domain":  "emclient\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-4274: This app/website doesnt seem to be supported."
+    },
+    {
+        "Domain":  "(.*\\.)?riigikohus\\.ee",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3591 Blocked because the websites hangs"
+    },
+    {
+        "Domain":  "(.*\\.)?riigiteataja\\.ee",
+        "IsEnabled":  false,
+        "Notes":  "LMA-3591 Blocked because the websites hangs"
+    },
+    {
+        "Domain":  "(.*\\.)?knowledgecity\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-4205 Blocked because the websites hangs"
+    },
+    {
+        "Domain":  "adobeaemcloud\\.com",
+        "IsEnabled":  true,
+        "UseParentVisibleBounds":  {
+                                       "IA2AttributeRegex":  ".*class:cke_wysiwyg_frame.*"
+                                   },
+        "Notes":  "Adobe Experience Manager contenteditable element has a wrong height, parent editor element has correct bounds"
+    },
+    {
+        "Domain":  ".*\\.atlassian.net",
+        "UrlRegex":  "/wiki",
+        "AncestorAttributesRegex":  "^(?!.*(id:(layout-main-wrapper|com-atlassian-confluence)|ak-editor-content-area-region)).*$"
+    },
+    {
+        "Domain":  "make.powerapps.com",
+        "IgnoreEmptyDiv":  true,
+        "IgnoreSensitivityCheck":  true,
+        "IsEnabled":  true
+    },
+    {
+        "Moniker":  "msedgewebview2.exe",
+        "ParentExecutableName":  "hrblock.ocs.ocpapp.exe",
+        "IgnoreHtmlInputField":  false,
+        "IgnoreEmptyDiv":  true,
+        "VisibleBoundsClippingStrategy":  "HRBlock",
+        "Notes":  "LMA-7049: Fix detachment during apply - body element with class ${css_class} reports incorrect bounds, ql-editor positions content outside its bounds"
+    },
+    {
+        "Domain":  "apps.powerapps.com",
+        "IgnoreEmptyDiv":  true,
+        "IgnoreSensitivityCheck":  true,
+        "IgnoreHtmlInputField":  false,
+        "IsEnabled":  true
+    },
+    {
+        "Moniker":  "msedgewebview2.exe",
+        "ParentExecutableName":  "powerappsnative.generic.exe",
+        "IgnoreEmptyDiv":  true,
+        "IgnoreSensitivityCheck":  true,
+        "IgnoreHtmlInputField":  false,
+        "IsEnabled":  true
+    },
+    {
+        "Domain":  "(.*\\.)?kwizl\\.eu",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5169 Blocked by request from the owner"
+    },
+    {
+        "Domain":  "(.*\\.)?kwizl\\.app",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5169 Blocked by request from the owner"
+    },
+    {
+        "Domain":  "(.*\\.)?cloud\\.calxa\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5244 Blocked by request from the owner"
+    },
+    {
+        "Domain":  "(.*\\.)?groovyconsole\\.dev",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5247 Blocked by request from the user"
+    },
+    {
+        "Domain":  "(.*\\.)?wonderin\\.ai",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5251 Blocked by request from the user. Interfere with that website’s framework"
+    },
+    {
+        "Domain":  "(.*\\.)?books\\.nextchapters\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5149 Blocked by request from the user. Potential Ext conflict with JS."
+    },
+    {
+        "Domain":  "(.*\\.)?sendoutcards\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5212 Blocked by request from the user."
+    },
+    {
+        "Moniker":  "acw\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5277: blocked by request from the user. Crash in the app."
+    },
+    {
+        "Domain":  "(.*\\.)?am-test\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5319 Blocked by request from the owner."
+    },
+    {
+        "Domain":  "(.*\\.)?vce-hr\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5319 Blocked by request from the owner."
+    },
+    {
+        "Domain":  "(.*\\.)?veritas-hr\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5319 Blocked by request from the owner."
+    },
+    {
+        "Domain":  "(.*\\.)?ravtech\\.co\\.il",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5319 Blocked by request from the owner."
+    },
+    {
+        "Domain":  "(.*\\.)?learnship\\.com",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5449 Blocked by request from website owner"
+    },
+    {
+        "Domain":  "(.*\\.)?trello\\.com",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "PBUG-1842: Ignore empty div to correct HighlightBox bounds."
+    },
+    {
+        "Moniker":  "trello.exe",
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "Notes":  "PBUG-1842: Ignore empty div to correct HighlightBox bounds."
+    },
+    {
+        "Domain":  "(.*\\.)?atticus\\.io",
+        "IsEnabled":  false,
+        "Notes":  "LMA-5458 Blocked by request from support"
+    },
+    {
+        "Moniker":  "AegisLerms.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-1548 Deactivate Llama Windows in New World LERMS app"
+    },
+    {
+        "Moniker":  "filemaker\\.exe|filemaker pro\\.exe|filemaker pro advanced\\.exe",
+        "IsEnabled":  false,
+        "Description":  "Blocked because the user has issue with this app"
+    },
+    {
+        "Domain":  "canva\\.com",
+        "IsEnabled":  true,
+        "IgnoreParentsVisibility":  true,
+        "IgnoreReadonlyContent":  true,
+        "Notes":  "PBUG-2728: Skip non-editable design text elements in the Canva canvas.",
+        "ViewportOverlays":  {
+                                 "ElementAttributesRegexString":  ".*tag:div;.*class:a5dsSw;.*",
+                                 "ContainerAttributesRegexString":  ".*tag:main;.*class:_7Z28OQ|uJzGsg;.*",
+                                 "TopOverlayAttributesRegexString":  ".*tag:div;.*class:O0f3hg;.*",
+                                 "BottomOverlayAttributesRegexString":  ".*tag:nav;.*class:Ap9otQ;.*"
+                             }
+    },
+    {
+        "Domain":  ".*(word|sharepoint|office|officeapps|powerpoint|onedrive|1drv|sp\\.docs|microsoft365)\\.(online\\.office\\.com|officeapps\\.live\\.com|cloud\\.microsoft|office\\.live\\.com|live\\.com|com|ms).*",
+        "ElementName":  "WACViewPanel_EditingElement",
+        "CheckAncestors":  false,
+        "IsEnabled":  true,
+        "IgnoreEmptyDiv":  true,
+        "IgnoreParentsVisibility":  true,
+        "Notes":  "PBUG-2350: Office Online and OneDrive comprehensive integration fixes"
+    },
+    {
+        "Domain":  "lists\\.live\\.com",
+        "IgnoreSensitivityCheck":  true,
+        "IgnoreEmptyDiv":  true,
+        "RequiredEnabledExperimentationGate":  "llama_win_sharepoint_lists_fix",
+        "Notes":  "PBUG-3149: SharePoint Lists — bypass sensitivity checks and skip zero-height ancestors for highlights."
+    },
+    {
+        "Domain":  ".*\\.sharepoint\\.com",
+        "UrlRegex":  "/Lists/",
+        "IgnoreSensitivityCheck":  true,
+        "IgnoreEmptyDiv":  true,
+        "RequiredEnabledExperimentationGate":  "llama_win_sharepoint_lists_fix",
+        "Notes":  "PBUG-3149: SharePoint Lists — bypass sensitivity checks and skip zero-height ancestors for highlights."
+    },
+    {
+        "Domain":  "app\\.smartsheet\\.com",
+        "IgnoreEmptyDiv":  true,
+        "MinElementWidth":  100,
+        "RequiredEnabledExperimentationGate":  "llama_win_enable_smartsheet",
+        "Notes":  "LMA-7849: Smartsheet integration overrides."
+    },
+    {
+        "Moniker":  "pdfeditor\\.exe",
+        "TextRectCorrection":  "DpiUnscaled",
+        "Notes":  "PBUG: PDF X reports text range rectangles with the in-client offset left in device-independent units, so underlines are misplaced or missing above 100% scale. Keep above the catch-all record below, which completes the merge and ends the loop."
+    },
+    {
+        "Domain":  ".*\\.atlassian\\.net",
+        "UrlRegex":  "/(browse|issues)(/|\\?|#|$)",
+        "VisibleBoundsClippingStrategy":  "SkipNonOverlappingAncestors",
+        "Notes":  "PBUG-3658: Jira preview ancestors miss the editor and collapse highlights to height 0. Jira paths only. Keep above the catch-all below."
+    },
+    {
+        "IsEnabled":  true,
+        "MinElementWidth":  150,
+        "DefaultPosition":  {
+                                "Corner":  "TopRight",
+                                "Offset":  "0, -20"
+                            }
+    },
+    {
+        "Moniker":  "aegismobile\\.exe",
+        "ElementName":  "^Field Report Editor$",
+        "IsEnabled":  true,
+        "CheckAncestors":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "LMA-6382: Disable SensitivityChecks in aegismobile.exe report editor."
+    },
+    {
+        "Moniker":  "leas\\.exe",
+        "ElementName":  "^Workspace$",
+        "IsEnabled":  true,
+        "CheckAncestors":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "LMA-6904: Disable SensitivityChecks in leas.exe text control."
+    },
+    {
+        "Domain":  "greenhouse.io",
+        "ClassName":  "editor-container",
+        "CheckAncestors":  true,
+        "IsEnabled":  true,
+        "IgnoreSensitivityCheck":  true,
+        "Notes":  "LMA-6474: Score card text field exposes the full text in accessibility tree, so we need to disable sensitivity checks."
+    },
+    {
+        "Moniker":  "anydesk\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "Block Grammarly integration in AnyDesk."
+    },
+    {
+        "Moniker":  "RemoteDesktopManager.exe",
+        "IsEnabled":  false,
+        "Notes":  "PBUG-2027 Deactivate Llama Windows in Remote Desktop Manager app"
+    },
+    {
+        "Moniker":  "devenv.exe",
+        "IsEnabled":  false,
+        "Notes":  "PBUG-2526: Block Llama in Visual Studio"
+    },
+    {
+        "Moniker":  "Spotify\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-7247: Block Llama in Spotify app - no value, causes issues in search bar"
+    },
+    {
+        "Domain":  "(.*\\.)?docs\\.truemark\\.ai",
+        "IsEnabled":  false,
+        "Notes":  "LMA-7232: Blocked by request from website owner"
+    },
+    {
+        "Moniker":  "cursor\\.exe",
+        "IsEnabled":  false,
+        "Notes":  "LMA-7581: Block Grammarly in Cursor IDE - text corruption due to missing IAccessible2 COM interfaces"
+    },
+    {
+        "Domain":  "(.*\\.)?app\\.breeva\\.io",
+        "IsEnabled":  false,
+        "Notes":  "LMA-7746: Blocked by request from website owner due to performance issues with tiptap.js editor"
+    },
+    {
+        "Domain":  "(.*\\.)?revid\\.ai",
+        "IsEnabled":  false,
+        "Notes":  "LMA-7885 Blocked by request from website owner"
+    }
+]

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../TypeRight.Domain/TypeRight.Domain.csproj" />
+    <ProjectReference Include="../TypeRight.Infrastructure/TypeRight.Infrastructure.csproj" />
+    <ProjectReference Include="../TypeRight.Configuration/TypeRight.Configuration.csproj" />
+  </ItemGroup>
+</Project>

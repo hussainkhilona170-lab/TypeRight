@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>TypeRight</AssemblyName>
+    <RootNamespace>TypeRight.Desktop</RootNamespace>
+    <ApplicationIcon>Resources\TypeRight.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../TypeRight.Domain/TypeRight.Domain.csproj" />
+    <ProjectReference Include="../TypeRight.Engine/TypeRight.Engine.csproj" />
+    <ProjectReference Include="../TypeRight.Configuration/TypeRight.Configuration.csproj" />
+    <ProjectReference Include="../TypeRight.Documents/TypeRight.Documents.csproj" />
+    <ProjectReference Include="../TypeRight.Suggestions/TypeRight.Suggestions.csproj" />
+    <ProjectReference Include="../TypeRight.TsfBridge/TypeRight.TsfBridge.csproj" />
+    <ProjectReference Include="../TypeRight.WPFOverlay/TypeRight.WPFOverlay.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\TypeRight.ico" />
+  </ItemGroup>
+
+</Project>

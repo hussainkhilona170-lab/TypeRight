@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+
+  <Product Id="*"
+           Name="TypeRight 2.0"
+           Language="1033"
+           Version="2.0.0.0"
+           Manufacturer="TypeRight"
+           UpgradeCode="8F3C2A1B-4D5E-6F70-8A91-B2C3D4E5F6A7">
+
+    <Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perUser"
+             Description="TypeRight 2.0 - Windows Typing Companion"
+             Comments="Private, local, native Windows typing assistant" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of TypeRight is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Properties -->
+    <Property Id="ARPPRODUCTICON" Value="TypeRightIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/typeright/typeright" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <!-- UI -->
+    <UIRef Id="WixUI_InstallDir" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <!-- Feature -->
+    <Feature Id="ProductFeature" Title="TypeRight 2.0" Level="1">
+      <ComponentGroupRef Id="ApplicationComponents" />
+      <ComponentGroupRef Id="ShortcutComponents" />
+      <ComponentRef Id="StartupRegistry" />
+    </Feature>
+
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Directory Id="INSTALLFOLDER" Name="TypeRight">
+          <Directory Id="AppFolder" Name="App" />
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="TypeRightMenuFolder" Name="TypeRight" />
+      </Directory>
+      <Directory Id="DesktopFolder" />
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ApplicationComponents" Directory="AppFolder">
+      <!-- All published app files will be harvested by heat.exe during build -->
+      <Component Id="TypeRightExe" Guid="*">
+        <File Id="TypeRightExeFile" Source="$(var.PublishDir)TypeRight.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ShortcutComponents">
+      <!-- Start Menu shortcut -->
+      <Component Id="StartMenuShortcut" Guid="*" Directory="TypeRightMenuFolder">
+        <Shortcut Id="StartMenuTypeRight"
+                  Name="TypeRight 2.0"
+                  Description="Windows Typing Companion"
+                  Target="[AppFolder]TypeRight.exe"
+                  Arguments="--show"
+                  Icon="TypeRightIcon"
+                  WorkingDirectory="AppFolder" />
+        <RegistryValue Root="HKCU" Key="Software\TypeRight\TypeRight2" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+        <RemoveFolder Id="RemoveTypeRightMenu" On="uninstall" />
+      </Component>
+
+      <!-- Desktop shortcut (optional - disabled by default, user can enable) -->
+      <Component Id="DesktopShortcut" Guid="*" Directory="DesktopFolder">
+        <Condition>DESKTOPSHORTCUT = 1</Condition>
+        <Shortcut Id="DesktopTypeRight"
+                  Name="TypeRight 2.0"
+                  Description="Windows Typing Companion"
+                  Target="[AppFolder]TypeRight.exe"
+                  Arguments="--show"
+                  Icon="TypeRightIcon"
+                  WorkingDirectory="AppFolder" />
+        <RegistryValue Root="HKCU" Key="Software\TypeRight\TypeRight2" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <!-- Startup registration (optional - user controls via app settings) -->
+    <Component Id="StartupRegistry" Guid="*" Directory="AppFolder">
+      <Condition>STARTWITHWINDOWS = 1</Condition>
+      <RegistryValue Root="HKCU"
+                     Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+                     Name="TypeRight"
+                     Value="&quot;[AppFolder]TypeRight.exe&quot;"
+                     Type="string"
+                     KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+  <Fragment>
+    <Icon Id="TypeRightIcon" SourceFile="$(var.PublishDir)TypeRight.exe" />
+  </Fragment>
+
+</Wix>

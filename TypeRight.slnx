@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TypeRight.Application/TypeRight.Application.csproj" />
+    <Project Path="src/TypeRight.Configuration/TypeRight.Configuration.csproj" />
+    <Project Path="src/TypeRight.Desktop/TypeRight.Desktop.csproj" />
+    <Project Path="src/TypeRight.Domain/TypeRight.Domain.csproj" />
+    <Project Path="src/TypeRight.Documents/TypeRight.Documents.csproj" />
+    <Project Path="src/TypeRight.Engine/TypeRight.Engine.csproj" />
+    <Project Path="src/TypeRight.Infrastructure/TypeRight.Infrastructure.csproj" />
+    <Project Path="src/TypeRight.TSFWrapper/TypeRight.TSFWrapper.csproj" />
+    <Project Path="src/TypeRight.Privacy/TypeRight.Privacy.csproj" />
+    <Project Path="src/TypeRight.Suggestions/TypeRight.Suggestions.csproj" />
+    <Project Path="src/TypeRight.TsfBridge/TypeRight.TsfBridge.csproj" />
+    <Project Path="src/TypeRight.WPFOverlay/TypeRight.WPFOverlay.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TypeRight.Documents.Tests/TypeRight.Documents.Tests.csproj" />
+    <Project Path="tests/TypeRight.Domain.Tests/TypeRight.Domain.Tests.csproj" />
+    <Project Path="tests/TypeRight.Engine.Tests/TypeRight.Engine.Tests.csproj" />
+    <Project Path="tests/TypeRight.Privacy.Tests/TypeRight.Privacy.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/TypeRight.EngineHost/TypeRight.EngineHost.csproj" />
+  </Folder>
+</Solution>

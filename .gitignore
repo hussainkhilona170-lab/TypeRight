@@ -1,0 +1,21 @@
+# Build output
+bin/
+obj/
+publish/
+artifacts/
+*.user
+*.suo
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Local diagnostic captures
+*.log
+*.png
+!src/TypeRight.Desktop/Resources/*.ico

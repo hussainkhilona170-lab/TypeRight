@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>TypeRight.TsfBridge</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../TypeRight.Domain/TypeRight.Domain.csproj" />
+    <ProjectReference Include="../TypeRight.Engine/TypeRight.Engine.csproj" />
+    <ProjectReference Include="../TypeRight.Configuration/TypeRight.Configuration.csproj" />
+    <ProjectReference Include="../TypeRight.Privacy/TypeRight.Privacy.csproj" />
+    <ProjectReference Include="../TypeRight.Suggestions/TypeRight.Suggestions.csproj" />
+  </ItemGroup>
+
+</Project>
