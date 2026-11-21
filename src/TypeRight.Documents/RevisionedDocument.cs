@@ -31,9 +31,10 @@ namespace TypeRight.Documents
             if (delta == null) return null;
             if (Revision != delta.Revision) return null;
 
-            int start = delta.RebaseOffset(Start);
-            int end = delta.RebaseOffset(End);
+            int start = delta.RebaseOffsetClamped(Start);
+            int end = delta.RebaseOffsetClamped(End);
             if (start < 0 || end < 0 || end <= start) return null;
+            if (!delta.RetainsAnyInRange(Start, End)) return null;
             return new TextRange(start, end, Revision + 1);
         }
 
@@ -82,12 +83,39 @@ namespace TypeRight.Documents
             result = null;
             if (delta == null) return ApplyOutcome.CorruptDelta;
             if (expectedRevision != _revision) return ApplyOutcome.StaleRevision;
+            if (delta.Revision != expectedRevision) return ApplyOutcome.StaleRevision;
+            if (!IsStructurallyValid(delta, _text.Length)) return ApplyOutcome.CorruptDelta;
 
             string next = delta.Apply(_text);
             if (next == null) return ApplyOutcome.DeltaTooShort;
 
             result = new RevisionedDocument(next, _revision + 1);
             return ApplyOutcome.Applied;
+        }
+
+        private static bool IsStructurallyValid(DocumentDelta delta, int documentLength)
+        {
+            int position = 0;
+            foreach (var op in delta.Ops)
+            {
+                if (op.Count < 0) return false;
+                switch (op.Kind)
+                {
+                    case DeltaOpKind.Insert:
+                        if (op.Text == null || op.Text.Length != op.Count) return false;
+                        break;
+
+                    case DeltaOpKind.Retain:
+                    case DeltaOpKind.Delete:
+                        if (position + op.Count > documentLength) return false;
+                        position += op.Count;
+                        break;
+
+                    default:
+                        return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -110,24 +138,49 @@ namespace TypeRight.Documents
         }
 
         /// <summary>
-        /// Safety check equivalent: the replacement may only change the alert's
-        /// own context; the retained context length must remain identical.
+        /// Safety check: the delta must retain the exact prefix and suffix around
+        /// the range and consume exactly the range length between them. Aggregate
+        /// lengths alone are not enough - edits outside the range are rejected.
         /// </summary>
         public bool IsReplacementSafe(DocumentDelta delta, TextRange range)
         {
             if (delta == null) return false;
+            if (delta.Revision != _revision || range.Revision != _revision) return false;
+            if (range.Start < 0 || range.End > _text.Length || range.Length <= 0) return false;
             if (delta.BaseLength != _text.Length) return false;
-            if (!delta.PreservesRetainedLength(_text.Length - range.Length)) return false;
-            return delta.TargetLength == _text.Length - range.Length +
-                CountInsertedLength(delta);
-        }
 
-        private static int CountInsertedLength(DocumentDelta delta)
-        {
-            int total = 0;
-            foreach (var op in delta.Ops)
-                if (op.Kind == DeltaOpKind.Insert) total += op.Count;
-            return total;
+            int index = 0;
+            if (range.Start > 0)
+            {
+                if (index >= delta.Ops.Count) return false;
+                var prefix = delta.Ops[index];
+                if (prefix.Kind != DeltaOpKind.Retain || prefix.Count != range.Start) return false;
+                index++;
+            }
+
+            int consumed = 0;
+            while (index < delta.Ops.Count)
+            {
+                var op = delta.Ops[index];
+                if (op.Kind == DeltaOpKind.Retain) break;
+                if (op.Count < 0) return false;
+                if (op.Kind == DeltaOpKind.Delete) consumed += op.Count;
+                else if (op.Kind != DeltaOpKind.Insert) return false;
+                if (consumed > range.Length) return false;
+                index++;
+            }
+            if (consumed != range.Length) return false;
+
+            int trailing = _text.Length - range.End;
+            if (trailing > 0)
+            {
+                if (index >= delta.Ops.Count) return false;
+                var suffix = delta.Ops[index];
+                if (suffix.Kind != DeltaOpKind.Retain || suffix.Count != trailing) return false;
+                index++;
+            }
+
+            return index == delta.Ops.Count;
         }
     }
 }

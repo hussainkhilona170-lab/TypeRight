@@ -112,9 +112,10 @@ namespace TypeRight.Desktop
                     key.DeleteValue(StartupValueName, false);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Could not update startup setting: {ex.Message}", "TypeRight 2.0",
+                // Exception text can contain paths or other local details.
+                MessageBox.Show("The startup setting could not be updated.", "TypeRight 2.0",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
@@ -183,11 +184,11 @@ namespace TypeRight.Desktop
                 ResultDetail.Text = decision.Rationale ?? string.Empty;
                 ResultConfidence.Text = $"Confidence: {decision.Confidence:P0} | Reason: {decision.Reason}";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ResultPanel.Visibility = Visibility.Visible;
                 ResultAction.Text = "Error";
-                ResultDetail.Text = ex.Message;
+                ResultDetail.Text = "The correction engine could not evaluate this word.";
             }
         }
 

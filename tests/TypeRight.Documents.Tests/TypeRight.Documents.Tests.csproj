@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../src/TypeRight.Domain/TypeRight.Domain.csproj" />
     <ProjectReference Include="../../src/TypeRight.Documents/TypeRight.Documents.csproj" />
     <ProjectReference Include="../../src/TypeRight.Suggestions/TypeRight.Suggestions.csproj" />
   </ItemGroup>

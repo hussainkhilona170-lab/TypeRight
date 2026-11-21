@@ -1,5 +1,12 @@
-$path = 'C:\GrammarlyRE\desktop-payload\$LOCALAPPDATA\Grammarly\DesktopIntegrationsUpdate\Resources\Configuration\IntegrationOptions.json'
-$rules = Get-Content $path -Raw | ConvertFrom-Json
+param(
+  [string]$Source = (Join-Path $env:LOCALAPPDATA 'Grammarly\DesktopIntegrationsUpdate\Resources\Configuration\IntegrationOptions.json')
+)
+
+$path = $Source
+if (-not (Test-Path -LiteralPath $path)) {
+  throw "Integration rules file not found: $path (pass -Source <path> to override)"
+}
+$rules = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
 Write-Output ("Total rules: " + $rules.Count)
 Write-Output ("Properties: " + (($rules[0].PSObject.Properties.Name) -join ', '))
 Write-Output ''

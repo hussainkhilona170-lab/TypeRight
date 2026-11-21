@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="TypeRight" Height="200" Width="400"
         WindowStyle="None" AllowsTransparency="True"
-        Background="Transparent" Topmost="True" Focusable="True">
+        Background="Transparent" Topmost="True" Focusable="False" ShowActivated="False">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

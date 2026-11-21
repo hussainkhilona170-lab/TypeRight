@@ -14,7 +14,7 @@ $appName = "TypeRight 2.0"
 $installDir = Join-Path $env:LOCALAPPDATA "TypeRight"
 $startMenuDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\TypeRight"
 $desktopDir = [Environment]::GetFolderPath("Desktop")
-$sourceDir = Join-Path $PSScriptRoot "..\publish"
+$sourceDir = Join-Path (Split-Path -Parent $PSScriptRoot) "publish"
 
 function Write-Status($msg) {
     Write-Host "[TypeRight] $msg" -ForegroundColor Cyan
@@ -47,6 +47,9 @@ if ($Uninstall) {
     # Remove files
     Remove-Item -Path $installDir -Recurse -Force -ErrorAction SilentlyContinue
 
+    # Remove this installation's Add/Remove Programs entry
+    Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\TypeRight2.0" -Recurse -Force -ErrorAction SilentlyContinue
+
     Write-Status "TypeRight 2.0 has been uninstalled."
     exit 0
 }
@@ -57,6 +60,13 @@ Write-Status "Installing TypeRight 2.0..."
 if (-not (Test-Path (Join-Path $sourceDir "TypeRight.exe"))) {
     Write-Error "Application files not found. Please publish the app first using build-installer.ps1"
     exit 1
+}
+
+# Do not overwrite files belonging to a running instance.
+$running = @(Get-Process -Name TypeRight -ErrorAction SilentlyContinue)
+if ($running.Count -gt 0) {
+    Write-Warning ("TypeRight is running (PID(s): {0}). Close it and re-run this installer." -f (($running.Id) -join ', '))
+    exit 0
 }
 
 # Create install directory
@@ -99,7 +109,7 @@ Set-ItemProperty -Path $uninstallKey -Name "DisplayName" -Value $appName -Type S
 Set-ItemProperty -Path $uninstallKey -Name "DisplayVersion" -Value "2.0.0" -Type String
 Set-ItemProperty -Path $uninstallKey -Name "Publisher" -Value "TypeRight" -Type String
 Set-ItemProperty -Path $uninstallKey -Name "InstallLocation" -Value $installDir -Type String
-Set-ItemProperty -Path $uninstallKey -Name "UninstallString" -Value "powershell.exe -ExecutionPolicy Bypass -File `"$PSScriptRoot\Install-TypeRight.ps1`" -Uninstall" -Type String
+Set-ItemProperty -Path $uninstallKey -Name "UninstallString" -Value "powershell.exe -NoProfile -File `"$PSScriptRoot\Install-TypeRight.ps1`" -Uninstall" -Type String
 Set-ItemProperty -Path $uninstallKey -Name "DisplayIcon" -Value $exePath -Type String
 Set-ItemProperty -Path $uninstallKey -Name "NoModify" -Value 1 -Type DWord
 Set-ItemProperty -Path $uninstallKey -Name "NoRepair" -Value 1 -Type DWord

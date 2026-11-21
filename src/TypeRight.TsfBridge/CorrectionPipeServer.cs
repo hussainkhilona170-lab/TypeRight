@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Security.Principal;
@@ -21,23 +22,32 @@ namespace TypeRight.TsfBridge
     /// </summary>
     public sealed class CorrectionPipeServer : IDisposable
     {
+        private const int DefaultMaxConcurrentClients = 8;
+        private static readonly TimeSpan DefaultEngineTimeout = TimeSpan.FromMilliseconds(200);
+        private static readonly TimeSpan DisposeWaitTimeout = TimeSpan.FromSeconds(2);
+
         private readonly ICorrectionDecisionMaker _decisionMaker;
         private readonly ConfigurationSettings _configuration;
         private readonly PolicyEvaluator _policyEvaluator;
         private readonly LocalFeatureGates _features;
+        private readonly Func<bool> _isCorrectionEnabled;
+        private readonly TimeSpan _engineTimeout;
+        private readonly SemaphoreSlim _clientSlots;
+        private readonly object _clientTasksLock = new object();
+        private readonly List<Task> _clientTasks = new List<Task>();
         private CancellationTokenSource _cts;
         private Task _loop;
         private bool _disposed;
 
         public CorrectionPipeServer(ICorrectionDecisionMaker decisionMaker, ConfigurationSettings configuration)
-            : this(decisionMaker, configuration, null, null)
+            : this(decisionMaker, configuration, null, null, null)
         {
         }
 
         public CorrectionPipeServer(ICorrectionDecisionMaker decisionMaker,
                                     ConfigurationSettings configuration,
                                     PolicyEvaluator policyEvaluator)
-            : this(decisionMaker, configuration, policyEvaluator, null)
+            : this(decisionMaker, configuration, policyEvaluator, null, null)
         {
         }
 
@@ -45,11 +55,41 @@ namespace TypeRight.TsfBridge
                                     ConfigurationSettings configuration,
                                     PolicyEvaluator policyEvaluator,
                                     LocalFeatureGates features)
+            : this(decisionMaker, configuration, policyEvaluator, features, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a bridge with a runtime gate (used by the tray "Pause Service" action).
+        /// A null gate means corrections are enabled.
+        /// </summary>
+        public CorrectionPipeServer(ICorrectionDecisionMaker decisionMaker,
+                                    ConfigurationSettings configuration,
+                                    PolicyEvaluator policyEvaluator,
+                                    LocalFeatureGates features,
+                                    Func<bool> isCorrectionEnabled)
+            : this(decisionMaker, configuration, policyEvaluator, features, isCorrectionEnabled,
+                   DefaultEngineTimeout, DefaultMaxConcurrentClients)
+        {
+        }
+
+        public CorrectionPipeServer(ICorrectionDecisionMaker decisionMaker,
+                                    ConfigurationSettings configuration,
+                                    PolicyEvaluator policyEvaluator,
+                                    LocalFeatureGates features,
+                                    Func<bool> isCorrectionEnabled,
+                                    TimeSpan engineTimeout,
+                                    int maxConcurrentClients)
         {
             _decisionMaker = decisionMaker ?? throw new ArgumentNullException(nameof(decisionMaker));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _policyEvaluator = policyEvaluator;
             _features = features;
+            _isCorrectionEnabled = isCorrectionEnabled ?? (() => true);
+            _engineTimeout = engineTimeout;
+            if (maxConcurrentClients < 1)
+                throw new ArgumentOutOfRangeException(nameof(maxConcurrentClients));
+            _clientSlots = new SemaphoreSlim(maxConcurrentClients, maxConcurrentClients);
         }
 
         /// <summary>
@@ -67,6 +107,7 @@ namespace TypeRight.TsfBridge
             while (!token.IsCancellationRequested)
             {
                 NamedPipeServerStream server = null;
+                bool slotHeld = false;
                 try
                 {
                     // Current-user-only security: the native TSF DLL runs in the same user session.
@@ -89,68 +130,129 @@ namespace TypeRight.TsfBridge
                     await server.WaitForConnectionAsync(token).ConfigureAwait(false);
                     if (token.IsCancellationRequested) break;
 
-                    // Each connection is handled independently; a malformed client cannot
-                    // take down the bridge.
-                    _ = Task.Run(() => HandleClientAsync(server, token));
-                    server = null; // ownership transferred
+                    // Deny extra connections instead of queueing them behind a slow client.
+                    if (!await _clientSlots.WaitAsync(0, token).ConfigureAwait(false))
+                        continue;
+
+                    slotHeld = true;
+                    var connected = server;
+                    server = null; // ownership transferred to the client task
+
+                    // Capture a stable local instance before scheduling; never schedule
+                    // a closure over a variable that may be cleared by the loop.
+                    TrackClientTask(HandleClientAsync(connected, token));
+                    slotHeld = false;
                 }
                 catch (OperationCanceledException)
                 {
                     break;
                 }
+                catch (ObjectDisposedException)
+                {
+                    break; // bridge is shutting down
+                }
                 catch (Exception)
                 {
                     // Never record exception text - it may contain user data.
-                    try { server?.Dispose(); } catch { }
                     if (!token.IsCancellationRequested)
                     {
-                        try { Task.Delay(250, token).Wait(token); } catch { break; }
+                        try { await Task.Delay(250, token).ConfigureAwait(false); }
+                        catch (OperationCanceledException) { break; }
                     }
+                }
+                finally
+                {
+                    if (slotHeld)
+                    {
+                        try { _clientSlots.Release(); } catch { }
+                    }
+                    try { server?.Dispose(); } catch { }
                 }
             }
         }
 
+        private void TrackClientTask(Task task)
+        {
+            lock (_clientTasksLock)
+            {
+                _clientTasks.Add(task);
+            }
+            task.ContinueWith(t =>
+            {
+                lock (_clientTasksLock)
+                {
+                    _clientTasks.Remove(t);
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+        }
+
         private async Task HandleClientAsync(NamedPipeServerStream server, CancellationToken outerToken)
         {
-            using (server)
+            try
             {
-                try
+                using (var reader = new StreamReader(server, new UTF8Encoding(false), false, 1024, leaveOpen: true))
+                using (var writer = new StreamWriter(server, new UTF8Encoding(false), 1024, leaveOpen: true))
                 {
-                    using (var reader = new StreamReader(server, new UTF8Encoding(false), false, 1024, leaveOpen: true))
-                    using (var writer = new StreamWriter(server, new UTF8Encoding(false), 1024, leaveOpen: true))
+                    writer.AutoFlush = true;
+                    while (!outerToken.IsCancellationRequested && server.IsConnected)
                     {
-                        writer.AutoFlush = true;
-                        string line;
-                        while (!outerToken.IsCancellationRequested && server.IsConnected)
+                        var readTask = reader.ReadLineAsync();
+                        var completed = await Task.WhenAny(readTask, Task.Delay(Timeout.Infinite, outerToken)).ConfigureAwait(false);
+                        if (completed != readTask)
                         {
-                            var readTask = reader.ReadLineAsync();
-                            var completed = await Task.WhenAny(readTask, Task.Delay(Timeout.Infinite, outerToken)).ConfigureAwait(false);
-                            if (completed != readTask) break;
-
-                            line = await readTask.ConfigureAwait(false);
-                            if (line == null) break; // client closed
-
-                            string response;
-                            try
-                            {
-                                response = ProcessRequest(line);
-                            }
-                            catch (Exception)
-                            {
-                                // Sanitized error - never include exception messages or input.
-                                response = BridgeProtocol.FormatError("engine_fault");
-                            }
-
-                            await writer.WriteLineAsync(response).ConfigureAwait(false);
-                            await writer.FlushAsync().ConfigureAwait(false);
+                            ObserveFault(readTask);
+                            break;
                         }
+
+                        string line = await readTask.ConfigureAwait(false);
+                        if (line == null) break; // client closed
+
+                        // Time-box the whole engine call, not just the pipe read.
+                        var engineTask = Task.Run(() => ProcessRequest(line));
+                        string response;
+                        try
+                        {
+                            var engineCompleted = await Task.WhenAny(
+                                engineTask, Task.Delay(_engineTimeout, outerToken)).ConfigureAwait(false);
+                            if (engineCompleted != engineTask)
+                            {
+                                ObserveFault(engineTask);
+                                response = BridgeProtocol.FormatError("engine_timeout");
+                            }
+                            else
+                            {
+                                response = await engineTask.ConfigureAwait(false);
+                            }
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            ObserveFault(engineTask);
+                            break;
+                        }
+
+                        await writer.WriteLineAsync(response).ConfigureAwait(false);
+                        await writer.FlushAsync().ConfigureAwait(false);
                     }
                 }
-                catch (Exception)
-                {
-                    // Connection dropped - expected when the TSF DLL unloads. No logging of content.
-                }
             }
+            catch (Exception)
+            {
+                // Connection dropped or bridge shutting down. No logging of content.
+            }
+            finally
+            {
+                try { server.Dispose(); } catch { }
+                try { _clientSlots.Release(); } catch { }
+            }
+        }
+
+        private static void ObserveFault(Task task)
+        {
+            // The abandoned engine call may still fault after a timeout; observe it
+            // without ever reading or recording exception text.
+            task.ContinueWith(t => { _ = t.Exception; }, CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
         /// <summary>
@@ -166,8 +268,19 @@ namespace TypeRight.TsfBridge
             if (opcode == BridgeProtocol.Ping)
                 return BridgeProtocol.FormatPong();
 
+            if (!_isCorrectionEnabled())
+                return BridgeProtocol.FormatDeny();
+
+            if (IsApplicationExcluded(process))
+                return BridgeProtocol.FormatDeny();
+
             if (_policyEvaluator != null)
             {
+                bool hasContextFrame = process != null && domain != null && element != null;
+                if (_policyEvaluator.RequiresContext &&
+                    (string.IsNullOrEmpty(process) || !hasContextFrame))
+                    return BridgeProtocol.FormatDeny();
+
                 var policy = _policyEvaluator.Evaluate(process, domain, element);
                 if (!policy.AllowCorrection)
                     return BridgeProtocol.FormatDeny();
@@ -191,15 +304,23 @@ namespace TypeRight.TsfBridge
                     vocabularyVersion: new VocabularyVersion(2, 0));
 
                 var decision = _decisionMaker.MakeDecision(request);
+                bool belowThreshold = float.IsNaN(decision.Confidence) ||
+                                      decision.Confidence < _configuration.ConfidenceThreshold;
 
                 switch (decision.Action)
                 {
                     case CorrectionAction.AutoCorrect:
-                        if (!string.IsNullOrEmpty(decision.CorrectedWord))
-                            return BridgeProtocol.FormatAuto(decision.CorrectedWord);
-                        return BridgeProtocol.FormatNone();
+                        if (string.IsNullOrEmpty(decision.CorrectedWord))
+                            return BridgeProtocol.FormatNone();
+                        if (belowThreshold)
+                            return _configuration.ShowSuggestions
+                                ? BridgeProtocol.FormatSuggest(new[] { decision.CorrectedWord })
+                                : BridgeProtocol.FormatNone();
+                        return BridgeProtocol.FormatAuto(decision.CorrectedWord);
 
                     case CorrectionAction.Suggest:
+                        if (!_configuration.ShowSuggestions)
+                            return BridgeProtocol.FormatNone();
                         return BridgeProtocol.FormatSuggest(decision.Alternatives);
 
                     default:
@@ -210,6 +331,37 @@ namespace TypeRight.TsfBridge
             {
                 return BridgeProtocol.FormatError("engine_fault");
             }
+        }
+
+        /// <summary>
+        /// Checks the local configuration's exclusion list. The native service also
+        /// has a registry-based check; this bridge check is authoritative for
+        /// requests that reach it and does not duplicate registry access.
+        /// </summary>
+        private bool IsApplicationExcluded(string process)
+        {
+            string[] excluded = _configuration.ExcludedApplications;
+            if (excluded == null || excluded.Length == 0)
+                return false;
+
+            if (string.IsNullOrEmpty(process))
+                return true; // exclusions are configured but no process context was supplied
+
+            string processName = FileName(process);
+            foreach (string entry in excluded)
+            {
+                if (string.IsNullOrWhiteSpace(entry)) continue;
+                string excludedName = FileName(entry.Trim());
+                if (string.Equals(excludedName, processName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
+        private static string FileName(string value)
+        {
+            int separator = value.LastIndexOfAny(new[] { '\\', '/' });
+            return separator < 0 ? value : value.Substring(separator + 1);
         }
 
         private LanguageVariant ParseLanguage(string value)
@@ -231,8 +383,28 @@ namespace TypeRight.TsfBridge
         {
             if (_disposed) return;
             _disposed = true;
+
             try { _cts?.Cancel(); } catch { }
+
+            var tasks = new List<Task>();
+            if (_loop != null) tasks.Add(_loop);
+            lock (_clientTasksLock)
+            {
+                tasks.AddRange(_clientTasks);
+            }
+
+            try
+            {
+                if (tasks.Count > 0)
+                    Task.WaitAll(tasks.ToArray(), DisposeWaitTimeout);
+            }
+            catch (Exception)
+            {
+                // Shutdown is best-effort; cancellation has already been signalled.
+            }
+
             try { _cts?.Dispose(); } catch { }
+            try { _clientSlots?.Dispose(); } catch { }
         }
     }
 }

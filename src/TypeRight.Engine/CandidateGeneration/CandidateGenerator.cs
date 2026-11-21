@@ -1,16 +1,17 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TypeRight.Domain.Models;
-using TypeRight.Engine;
-using TypeRight.Engine.Vocabulary;
 using TypeRight.Engine.Tokenization;
+using TypeRight.Engine.Vocabulary;
 
 namespace TypeRight.Engine.CandidateGeneration;
 
 /// <summary>
 /// Generates candidate corrections for a misspelled word.
-/// Uses multiple strategies: edit distance, keyboard adjacency, n-gram similarity.
+/// Uses dictionary-driven edit distance matching, with keyboard adjacency and
+/// n-gram similarity applied during ranking.
 /// </summary>
 public interface ICandidateGenerator
 {
@@ -25,6 +26,22 @@ public interface ICandidateGenerator
         string misspelled,
         IReadOnlyList<string> contextWords,
         int maxCandidates = 10);
+
+    /// <summary>
+    /// Generates candidate corrections for a misspelled word, honoring the
+    /// requested language variant when validating candidates.
+    /// </summary>
+    /// <param name="misspelled">The word that may be misspelled.</param>
+    /// <param name="contextWords">Adjacent words for context-aware generation.</param>
+    /// <param name="languageVariant">The English variant to validate against.</param>
+    /// <param name="maxCandidates">Maximum number of candidates to generate.</param>
+    /// <returns>A list of (candidate, score) tuples, sorted by relevance.</returns>
+    IReadOnlyList<CandidateResult> GenerateCandidates(
+        string misspelled,
+        IReadOnlyList<string> contextWords,
+        LanguageVariant languageVariant,
+        int maxCandidates = 10)
+        => GenerateCandidates(misspelled, contextWords, maxCandidates);
 }
 
 /// <summary>
@@ -70,7 +87,7 @@ public enum CandidateGenerationStrategy
 }
 
 /// <summary>
-/// Generates candidates using Damerau-Levenshtein edit distance.
+/// Generates candidates using dictionary-driven Damerau-Levenshtein matching.
 /// </summary>
 public class EditDistanceCandidateGenerator : ICandidateGenerator
 {
@@ -95,157 +112,71 @@ public class EditDistanceCandidateGenerator : ICandidateGenerator
     }
 
     /// <summary>
-    /// Generates candidate corrections using edit distance, filtered by dictionary validity.
+    /// Generates candidate corrections using the dictionary word list.
     /// </summary>
     public IReadOnlyList<CandidateResult> GenerateCandidates(
         string misspelled,
         IReadOnlyList<string> contextWords,
         int maxCandidates = 10)
-    {
-        if (string.IsNullOrEmpty(misspelled)) return Array.Empty<CandidateResult>();
+        => GenerateCandidates(misspelled, contextWords, LanguageVariant.Auto, maxCandidates);
 
-        misspelled = misspelled.Trim();
+    /// <summary>
+    /// Generates candidate corrections using the dictionary word list and the
+    /// requested language variant.
+    /// </summary>
+    public IReadOnlyList<CandidateResult> GenerateCandidates(
+        string misspelled,
+        IReadOnlyList<string> contextWords,
+        LanguageVariant languageVariant,
+        int maxCandidates = 10)
+    {
+        if (string.IsNullOrWhiteSpace(misspelled)) return Array.Empty<CandidateResult>();
+
+        // The configured cap always wins over the per-call request.
+        int limit = Math.Min(maxCandidates, _maxCandidates);
+        if (limit <= 0 || _maxEditDistance <= 0) return Array.Empty<CandidateResult>();
+
+        string source = misspelled.Trim();
+        string normalizedSource = source.ToLowerInvariant();
         var candidates = new List<CandidateResult>();
 
-        // Generate all strings within max edit distance
-        var generated = GenerateWithinEditDistance(misspelled, _maxEditDistance);
-
-        // Filter and score
-        foreach (var candidate in generated)
+        // Iterate the dictionary word list rather than enumerating all possible
+        // strings within edit distance N (which explodes combinatorially).
+        foreach (string dictionaryWord in _dictionary.Words)
         {
-            // Skip the original word itself
-            if (string.Equals(candidate, misspelled, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(dictionaryWord)) continue;
+
+            string candidate = dictionaryWord.Trim();
+            if (string.Equals(candidate, source, StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            // Check dictionary validity
-            if (!_dictionary.IsValid(candidate, LanguageVariant.Auto))
+            if (Math.Abs(candidate.Length - normalizedSource.Length) > _maxEditDistance)
                 continue;
 
-            // Calculate edit distance score (lower distance = higher score)
-            int distance = DamerauLevenshtein.Distance(misspelled, candidate);
-            float score = CalculateEditDistanceScore(distance, misspelled.Length, candidate.Length);
+            int distance = DamerauLevenshtein.Distance(normalizedSource, candidate.ToLowerInvariant());
+            if (distance <= 0 || distance > _maxEditDistance)
+                continue;
 
+            if (!_dictionary.IsValid(candidate, languageVariant))
+                continue;
+
+            float score = CalculateEditDistanceScore(distance, normalizedSource.Length, candidate.Length);
             candidates.Add(new CandidateResult(candidate, score, CandidateGenerationStrategy.EditDistance));
         }
 
-        // Sort by score descending, then alphabetically for ties
+        // Sort by score descending, then by candidate text for deterministic ties.
         candidates.Sort((a, b) =>
         {
             int scoreCompare = b.InitialScore.CompareTo(a.InitialScore);
             if (scoreCompare != 0) return scoreCompare;
-            return string.Compare(a.Candidate, b.Candidate, StringComparison.OrdinalIgnoreCase);
+
+            int ignoreCase = string.Compare(a.Candidate, b.Candidate, StringComparison.OrdinalIgnoreCase);
+            return ignoreCase != 0
+                ? ignoreCase
+                : string.Compare(a.Candidate, b.Candidate, StringComparison.Ordinal);
         });
 
-        // Return top maxCandidates
-        return candidates.Count > maxCandidates
-            ? candidates.Take(maxCandidates).ToList()
-            : candidates;
-    }
-
-    /// <summary>
-    /// Generates all strings within the maximum edit distance from the source.
-    /// Uses a breadth-first approach.
-    /// </summary>
-    private HashSet<string> GenerateWithinEditDistance(string source, int maxDistance)
-    {
-        if (string.IsNullOrEmpty(source)) return new HashSet<string>();
-
-        var results = new HashSet<string>();
-        var queue = new Queue<(string current, int distance)>();
-        var visited = new HashSet<string>();
-
-        queue.Enqueue((source, 0));
-        visited.Add(source);
-
-        while (queue.Count > 0)
-        {
-            var (current, currentDistance) = queue.Dequeue();
-
-            if (currentDistance < maxDistance)
-            {
-                // Generate all possible edits at current distance + 1
-                var edits = GenerateEdits(current);
-
-                foreach (var edit in edits)
-                {
-                    if (!visited.Contains(edit))
-                    {
-                        visited.Add(edit);
-                        queue.Enqueue((edit, currentDistance + 1));
-
-                        // Add to results if it's different from the original
-                        if (edit != source)
-                        {
-                            results.Add(edit);
-                        }
-                    }
-                }
-            }
-        }
-
-        return results;
-    }
-
-    /// <summary>
-    /// Generates all possible single-edit variations of a string.
-    /// Insertions, deletions, substitutions, and transpositions.
-    /// </summary>
-    private HashSet<string> GenerateEdits(string word)
-    {
-        var edits = new HashSet<string>();
-        char[] chars = word.ToCharArray();
-        int length = chars.Length;
-
-        // Substitutions
-        for (int i = 0; i < length; i++)
-        {
-            for (char c = 'a'; c <= 'z'; c++)
-            {
-                if (c == chars[i]) continue;
-                char[] newChars = (char[])chars.Clone();
-                newChars[i] = c;
-                edits.Add(new string(newChars));
-            }
-        }
-
-        // Insertions
-        for (int i = 0; i <= length; i++)
-        {
-            for (char c = 'a'; c <= 'z'; c++)
-            {
-                char[] newChars = new char[length + 1];
-                for (int j = 0; j < i; j++)
-                    newChars[j] = chars[j];
-                newChars[i] = c;
-                for (int j = i; j < length; j++)
-                    newChars[j + 1] = chars[j];
-                edits.Add(new string(newChars));
-            }
-        }
-
-        // Deletions
-        for (int i = 0; i < length; i++)
-        {
-            char[] newChars = new char[length - 1];
-            for (int j = 0, k = 0; j < length; j++)
-            {
-                if (j == i) continue;
-                newChars[k++] = chars[j];
-            }
-            edits.Add(new string(newChars));
-        }
-
-        // Transpositions (adjacent swap)
-        for (int i = 0; i < length - 1; i++)
-        {
-            char[] newChars = (char[])chars.Clone();
-            char temp = newChars[i];
-            newChars[i] = newChars[i + 1];
-            newChars[i + 1] = temp;
-            edits.Add(new string(newChars));
-        }
-
-        return edits;
+        return candidates.Count > limit ? candidates.Take(limit).ToList() : candidates;
     }
 
     /// <summary>
@@ -254,19 +185,14 @@ public class EditDistanceCandidateGenerator : ICandidateGenerator
     /// </summary>
     private float CalculateEditDistanceScore(int distance, int originalLength, int candidateLength)
     {
-        // Normalized score: exponential decay with distance
-        // Distance 0 = score 1.0 (but we skip the original word)
-        // Distance 1 = score ~0.8
-        // Distance 2 = score ~0.5
-        // Distance >= 3 = score ~0.2
-
+        // Distance 1 = ~0.7, distance 2 = ~0.4, with a mild length penalty.
         float baseScore = 1.0f;
         float distancePenalty = distance * 0.3f;
-        float lengthFactor = Math.Max(1, Math.Min(originalLength, candidateLength)) / (float)Math.Max(originalLength, candidateLength);
+        int shorter = Math.Max(1, Math.Min(originalLength, candidateLength));
+        int longer = Math.Max(1, Math.Max(originalLength, candidateLength));
+        float lengthFactor = shorter / (float)longer;
 
-        float score = baseScore - distancePenalty;
-        score = Math.Max(0.1f, Math.Min(1.0f, score * lengthFactor));
-
+        float score = Math.Max(0.1f, Math.Min(1.0f, (baseScore - distancePenalty) * lengthFactor));
         return score;
     }
 }

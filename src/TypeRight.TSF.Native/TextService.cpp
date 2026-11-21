@@ -80,7 +80,7 @@ public:
             if (FAILED(hr)) break;
 
             if ((size_t)cch != _request->word.size() ||
-                !_wcsicmp(current, _request->word.c_str()) != 0)
+                _wcsicmp(current, _request->word.c_str()) != 0)
             {
                 Diagnostics::Event(L"edit_session_stale", S_FALSE, (unsigned long)cch);
                 hr = S_FALSE;
@@ -490,8 +490,16 @@ unsigned WINAPI CTextService::WorkerThread(LPVOID param)
             HRESULT hr = request->context->RequestEditSession(
                 service->_clientId, session, TF_ES_ASYNC | TF_ES_READWRITE, nullptr);
             Diagnostics::Event(L"edit_session_requested", hr);
-            if (FAILED(hr)) session->Release(); // also frees the request
-            else request = nullptr; // ownership transferred to session
+            if (FAILED(hr))
+            {
+                // Release destroys the session, whose destructor frees the request.
+                session->Release();
+                request = nullptr;
+            }
+            else
+            {
+                request = nullptr; // ownership transferred to session
+            }
         }
     }
 

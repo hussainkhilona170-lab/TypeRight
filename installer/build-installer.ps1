@@ -23,13 +23,15 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# Step 2: Harvest all published files into WiX component group
+# Step 2: Harvest all published files into the WiX component group used by TypeRightInstaller.wxs
 Write-Host "[2/3] Harvesting published files..." -ForegroundColor Yellow
 $harvestPath = Join-Path $installerDir "ApplicationFiles.wxs"
 
 $heat = "heat.exe"
 $heatPath = Get-Command $heat -ErrorAction SilentlyContinue
-if (-not $heatPath) {
+if ($heatPath) {
+    $heat = $heatPath.Source
+} else {
     # Try common WiX installation paths
     $possiblePaths = @(
         "C:\Program Files (x86)\WiX Toolset v3.11\bin\heat.exe",
@@ -43,7 +45,10 @@ if (-not $heatPath) {
     }
 }
 
-& $heat dir $publishDir -cg ApplicationFiles -gg -scom -sreg -sfrag -srd -dr AppFolder -var var.PublishDir -out $harvestPath
+# The component group id must match the ComponentGroupRef in TypeRightInstaller.wxs.
+# heat includes TypeRight.exe from the publish output, so the .wxs must not declare
+# a second component for the same executable.
+& $heat dir $publishDir -cg ApplicationComponents -gg -scom -sreg -sfrag -srd -dr AppFolder -var var.PublishDir -out $harvestPath
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to harvest files. Is WiX Toolset installed?"
@@ -56,19 +61,23 @@ if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir | Out-Null
 }
 
-$candle = "candle.exe"
-$light = "light.exe"
-# Resolve WiX tools similar to heat
 $wixBin = Split-Path -Parent $heat
+if (-not $wixBin) { $wixBin = $PSScriptRoot }
 $candle = Join-Path $wixBin "candle.exe"
 $light = Join-Path $wixBin "light.exe"
 
-$objectFiles = @(
+# Never link wixobj files left over from an earlier build.
+Get-ChildItem -LiteralPath $installerDir -Filter "*.wixobj" -File -ErrorAction SilentlyContinue |
+    Remove-Item -Force -ErrorAction SilentlyContinue
+
+$sourceFiles = @(
     (Join-Path $installerDir "TypeRightInstaller.wxs"),
     $harvestPath
-) -join " "
+)
+$publishDefine = "PublishDir=$publishDir\"
+$objectOutDir = "$installerDir\"
 
-& $candle -dPublishDir=$publishDir\ -out $installerDir\ $objectFiles
+& $candle "-d$publishDefine" -out $objectOutDir $sourceFiles
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to compile WiX sources"
@@ -76,7 +85,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $msiPath = Join-Path $outputDir "TypeRight-2.0-Setup.msi"
-$wixobjs = (Get-ChildItem $installerDir -Filter "*.wixobj" | ForEach-Object { $_.FullName }) -join " "
+$wixobjs = @(Get-ChildItem -LiteralPath $installerDir -Filter "*.wixobj" -File | ForEach-Object { $_.FullName })
 
 & $light -ext WixUIExtension -cultures:en-us -out $msiPath $wixobjs
 

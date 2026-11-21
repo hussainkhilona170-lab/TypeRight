@@ -64,8 +64,10 @@ namespace TypeRight.Desktop
                 _configuration.Load();
                 Settings = _configuration;
 
-                // Initialize vocabulary database
-                _configuration.InitializeVocabulary();
+                // Personal learning is opt-in: only create the local vocabulary
+                // database when the user has enabled it.
+                if (_configuration.PersonalLearningEnabled)
+                    _configuration.InitializeVocabulary();
 
                 // Initialize correction engine
                 _decisionMaker = EngineComposition.CreateDecisionMaker();
@@ -76,8 +78,10 @@ namespace TypeRight.Desktop
                 Features = new LocalFeatureGates();
                 Suggestions = new SuggestionFeed();
 
+                _serviceRunning = true;
                 var policy = new PolicyEvaluator(EnterprisePolicy.Load(), IntegrationRuleset.LoadDefault());
-                _pipeServer = new CorrectionPipeServer(_decisionMaker, _configuration, policy, Features);
+                _pipeServer = new CorrectionPipeServer(_decisionMaker, _configuration, policy, Features,
+                    () => _serviceRunning);
                 _pipeServer.Start();
 
                 // Initialize system tray
@@ -86,9 +90,6 @@ namespace TypeRight.Desktop
                 // Create main window (hidden initially - tray app)
                 _mainWindow = new MainWindow(_configuration, _decisionMaker);
                 this.MainWindow = _mainWindow;
-
-                // Start service
-                _serviceRunning = true;
 
                 // Show window on first run or if no config file exists
                 var configPath = Path.Combine(AppContext.BaseDirectory, _configuration.ConfigPath);
@@ -102,10 +103,11 @@ namespace TypeRight.Desktop
                         "TypeRight is running in the system tray.", ToolTipIcon.Info);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Failed to start TypeRight: {ex.Message}", "TypeRight 2.0",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                // Don't display exception text - it may contain paths or user data.
+                MessageBox.Show("TypeRight could not start. Please check the local installation and try again.",
+                    "TypeRight 2.0", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(1);
             }
         }
@@ -171,19 +173,38 @@ namespace TypeRight.Desktop
 
         private Icon LoadIcon()
         {
+            // The icon is a WPF resource; prefer the embedded copy so the tray
+            // never falls back to the generic system icon just because it was
+            // not copied next to the executable.
+            try
+            {
+                var uri = new Uri("pack://application:,,,/Resources/TypeRight.ico", UriKind.Absolute);
+                var resource = Application.GetResourceStream(uri);
+                if (resource != null)
+                {
+                    using (resource.Stream)
+                    {
+                        return new Icon(resource.Stream);
+                    }
+                }
+            }
+            catch
+            {
+                // Try the on-disk copy next.
+            }
+
             try
             {
                 var iconPath = Path.Combine(AppContext.BaseDirectory, "Resources", "TypeRight.ico");
                 if (File.Exists(iconPath))
                     return new Icon(iconPath);
-
-                // Fallback: extract from assembly resource or use system icon
-                return SystemIcons.Application;
             }
             catch
             {
-                return SystemIcons.Application;
+                // Fall through to the system icon.
             }
+
+            return SystemIcons.Application;
         }
 
         /// <summary>
@@ -215,8 +236,8 @@ namespace TypeRight.Desktop
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            // Save configuration on exit
-            _configuration?.Save();
+            // Save configuration on exit. A failed write must not prevent cleanup.
+            try { _configuration?.Save(); } catch { }
 
             // Stop the TSF bridge
             _pipeServer?.Dispose();

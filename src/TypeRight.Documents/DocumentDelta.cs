@@ -115,20 +115,28 @@ namespace TypeRight.Documents
 
             foreach (var op in Ops)
             {
+                if (op.Count < 0) return null;
+
                 switch (op.Kind)
                 {
                     case DeltaOpKind.Insert:
+                        if (op.Text == null) return null;
                         result.Append(op.Text);
                         break;
 
                     case DeltaOpKind.Retain:
+                        if (position + op.Count > baseText.Length) return null;
                         result.Append(baseText, position, op.Count);
                         position += op.Count;
                         break;
 
                     case DeltaOpKind.Delete:
+                        if (position + op.Count > baseText.Length) return null;
                         position += op.Count;
                         break;
+
+                    default:
+                        return null;
                 }
             }
 
@@ -145,36 +153,79 @@ namespace TypeRight.Documents
         {
             if (baseOffset < 0 || baseOffset > BaseLength) return -1;
 
+            var (mapped, deleted) = MapOffset(baseOffset);
+            return deleted ? -1 : mapped;
+        }
+
+        /// <summary>
+        /// Like <see cref="RebaseOffset"/>, but clamps offsets that fall inside a
+        /// deletion to the position where the deletion occurred. Used when
+        /// rebasing ranges that only partially overlap a deletion.
+        /// </summary>
+        internal int RebaseOffsetClamped(int baseOffset)
+        {
+            if (baseOffset < 0 || baseOffset > BaseLength) return -1;
+            return MapOffset(baseOffset).Mapped;
+        }
+
+        private (int Mapped, bool Deleted) MapOffset(int baseOffset)
+        {
             int basePos = 0;
             int targetPos = 0;
+            int mapped = 0;
+            int mappedBoundary = -1;
+            bool found = false;
+            bool deleted = false;
 
             foreach (var op in Ops)
             {
                 if (op.Kind == DeltaOpKind.Insert)
                 {
-                    // An insert at a boundary shifts a caret at that boundary.
                     targetPos += op.Count;
+                    // Only an insert at the queried offset shifts the mapping.
+                    if (found && basePos == mappedBoundary && baseOffset == mappedBoundary)
+                        mapped += op.Count;
                     continue;
                 }
 
                 int opEnd = basePos + op.Count;
-
-                if (baseOffset >= basePos && baseOffset <= opEnd)
+                if (!found && baseOffset >= basePos && baseOffset <= opEnd)
                 {
-                    if (op.Kind == DeltaOpKind.Delete)
-                    {
-                        // The far edge of a deletion still maps to a valid
-                        // position; only offsets strictly inside are lost.
-                        return baseOffset == opEnd ? targetPos : -1;
-                    }
-                    return targetPos + (baseOffset - basePos);
+                    found = true;
+                    mappedBoundary = opEnd;
+                    deleted = op.Kind == DeltaOpKind.Delete && baseOffset < opEnd;
+                    mapped = targetPos + (op.Kind == DeltaOpKind.Retain ? baseOffset - basePos : 0);
                 }
 
                 basePos = opEnd;
                 if (op.Kind == DeltaOpKind.Retain) targetPos += op.Count;
             }
 
-            return targetPos;
+            return found ? (mapped, deleted) : (targetPos, false);
+        }
+
+        /// <summary>
+        /// True when at least one character in the half-open base range survives
+        /// the delta. Used to distinguish a shrunken range from a fully deleted one.
+        /// </summary>
+        internal bool RetainsAnyInRange(int start, int end)
+        {
+            if (start < 0 || end > BaseLength || end <= start) return false;
+
+            int basePos = 0;
+            foreach (var op in Ops)
+            {
+                if (basePos >= end) break;
+                int opEnd = basePos + op.Count;
+                if (op.Kind == DeltaOpKind.Retain)
+                {
+                    int overlapStart = Math.Max(basePos, start);
+                    int overlapEnd = Math.Min(opEnd, end);
+                    if (overlapEnd > overlapStart) return true;
+                }
+                basePos = opEnd;
+            }
+            return false;
         }
 
         /// <summary>
@@ -199,12 +250,14 @@ namespace TypeRight.Documents
 
         public DeltaBuilder Retain(int count)
         {
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
             if (count > 0) _ops.Add(DeltaOp.Retain(count));
             return this;
         }
 
         public DeltaBuilder Delete(int count)
         {
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
             if (count > 0) _ops.Add(DeltaOp.Delete(count));
             return this;
         }
@@ -232,7 +285,7 @@ namespace TypeRight.Documents
     /// </summary>
     public static class TextDiffer
     {
-        public static DocumentDelta Compute(string oldText, string newText)
+        public static DocumentDelta Compute(string oldText, string newText, int revision = 0)
         {
             if (oldText == null) throw new ArgumentNullException(nameof(oldText));
             if (newText == null) throw new ArgumentNullException(nameof(newText));
@@ -255,7 +308,7 @@ namespace TypeRight.Documents
                 .Delete(oldMiddle)
                 .Insert(newText.Substring(prefix, newMiddle))
                 .Retain(suffix)
-                .Build();
+                .Build(revision);
         }
     }
 }

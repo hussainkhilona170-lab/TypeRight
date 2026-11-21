@@ -28,10 +28,6 @@ public interface IConfidenceCalculator
 /// </summary>
 public class ConfidenceCalculator : IConfidenceCalculator
 {
-    private const float HighConfidenceThreshold = 0.85f;
-    private const float MediumConfidenceThreshold = 0.65f;
-    private const float LowConfidenceThreshold = 0.40f;
-
     /// <summary>
     /// Calculates confidence and suggests an action based on ranked candidates.
     /// </summary>
@@ -71,26 +67,27 @@ public class ConfidenceCalculator : IConfidenceCalculator
                 action = CorrectionAction.Preserve;
                 break;
 
+            case ReasonCategory.LowConfidence:
+                // Low-confidence decisions must never auto-correct, regardless of score.
+                confidence = Math.Min(topScore, ConfidenceThresholds.Low);
+                action = CorrectionAction.Preserve;
+                break;
+
             case ReasonCategory.InsufficientData:
                 confidence = 0.2f;
                 action = CorrectionAction.Preserve;
                 break;
 
             default:
-                if (topScore >= HighConfidenceThreshold)
+                if (topScore >= ConfidenceThresholds.High)
                 {
                     confidence = topScore;
                     action = CorrectionAction.AutoCorrect;
                 }
-                else if (topScore >= MediumConfidenceThreshold)
+                else if (topScore >= ConfidenceThresholds.Medium)
                 {
                     confidence = topScore;
                     action = CorrectionAction.Suggest;
-                }
-                else if (topScore >= LowConfidenceThreshold)
-                {
-                    confidence = topScore;
-                    action = CorrectionAction.Preserve;
                 }
                 else
                 {

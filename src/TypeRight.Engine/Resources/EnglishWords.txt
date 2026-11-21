@@ -1,0 +1,51 @@
+# Common English words used as the base (American-spelled) vocabulary.
+# Regional spellings are defined in RegionalSpelling.cs and added by EngineComposition.
+# One or more space-separated words per line; lines starting with '#' are ignored.
+the of and to in a is that it for was on are as with his they at be this
+have from or one had by word but not what all were we when your can said there
+use an each which she do how their if will up other about out many then them these
+some her would make like him into time has look two more write go see number no
+way could people my than first water been call who oil its now find long down day
+did get come made may part over new sound take only little work know place year live
+back give most very after thing our just name good sentence man think say great where
+help through much before line right too mean old any same tell boy follow came want
+show also around form three small set put end does another well large must big even
+such because turn here why ask went men read need land different home us move try
+kind hand picture again change off play spell air away animal house point page letter
+mother answer found study still learn should world high every near add food between
+own below country plant last school father keep tree never start city earth eye light
+thought head under story saw left few while along might close something seem next hard
+open example begin life always those both paper together got group often run important
+until children side feet car mile night walk white sea began grow took four state once
+book hear stop without second later miss idea enough eat face watch far really almost
+above girl cut young talk soon list song being leave family body music color stand sun
+questions mark dog horse birds problem complete room known since ever piece told usually
+friends easy heard order red door sure become top ship across today during short better
+best however low hours black products happened whole measure remember early waves reached
+listen wind rock space covered fast several hold himself toward five step morning passed
+vowel true hundred against pattern center love person money serve appear road half included
+finance report decision view relationship term capital trade perhaps rather quite
+hello test testing tester tested tests yes okay yeah fine please thanks thank welcome
+goodbye bye again maybe certain unclear possible impossible open closed locked empty full
+busy free ready lazy tired awake asleep sick healthy company business market price cost
+value pay paid account bank check doctor nurse hospital medicine health mind heart brain
+blood neck shoulder stomach skin hair ear nose mouth tooth teeth sister brother son
+daughter parents friend neighbor teacher student classroom lesson homework books pencil
+pen eraser desk chair table floor wall window roof street bridge river lake mountain hill
+forest flowers grass garden farm field town village nation region government president
+minister citizen law rules rights duty court police weather rain snow cloud storm moon
+stars sky ground fire ice steam afternoon evening midnight noon tomorrow yesterday week
+month january february march april june july august september october november december
+monday tuesday wednesday thursday friday saturday sunday weekend holiday vacation
+six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen
+eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety fourth fifth
+next previous others every dark bright quick slow rapid sudden gradual late yet
+sad angry glad afraid scared brave calm quiet loud noisy silent excellent perfect
+terrible awful nice gentle weak soft rough smooth clean dirty fresh ancient modern
+simple complex clear strong heavy narrow thick thin difficult grade level rate speed
+weight height length size moment period age count amount total sum score solution
+method process paragraph article message note mail email phone circle square shape
+program programming computer keyboard screen mouse data file folder software hardware
+defense offense favorite organize traveling recognized analyze realize color
+capability feature design support service system network access security database
+mine yours hers ours theirs whom whose

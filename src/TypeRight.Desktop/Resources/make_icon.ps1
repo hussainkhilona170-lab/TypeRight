@@ -2,7 +2,7 @@
 # ICO format: header + directory entry + BMP (BITMAPINFOHEADER + XOR mask + AND mask)
 
 $size = 32
-$output = "C:\Users\Administrator\Downloads\TypeRight!\src\TypeRight.Desktop\Resources\TypeRight.ico"
+$output = Join-Path $PSScriptRoot "TypeRight.ico"
 
 # BMP info header (40 bytes)
 $bmpHeader = New-Object byte[] 40

@@ -46,6 +46,16 @@ namespace TypeRight.Documents
     {
         private readonly List<ProvenanceSpan> _spans = new List<ProvenanceSpan>();
 
+        public ProvenanceTracker() : this(0)
+        {
+        }
+
+        public ProvenanceTracker(int revision)
+        {
+            Revision = revision;
+        }
+
+        public int Revision { get; private set; }
         public bool IsEnabled { get; set; } = false;
         public int SpanCount => _spans.Count;
 
@@ -55,6 +65,7 @@ namespace TypeRight.Documents
         {
             if (!IsEnabled) return;
             if (start < 0 || length <= 0) return;
+            if (!Enum.IsDefined(typeof(AuthorshipKind), kind)) return;
             _spans.Add(new ProvenanceSpan(start, length, kind, DateTimeOffset.UtcNow));
         }
 
@@ -64,14 +75,19 @@ namespace TypeRight.Documents
         /// </summary>
         public void Rebase(DocumentDelta delta)
         {
-            if (delta == null || _spans.Count == 0) return;
+            if (delta == null) return;
+            if (delta.Revision != Revision) return;
+            Revision++;
+            if (_spans.Count == 0) return;
 
             var next = new List<ProvenanceSpan>(_spans.Count);
             foreach (var span in _spans)
             {
-                int start = delta.RebaseOffset(span.Start);
-                int end = delta.RebaseOffset(span.Start + span.Length);
+                int spanEnd = span.Start + span.Length;
+                int start = delta.RebaseOffsetClamped(span.Start);
+                int end = delta.RebaseOffsetClamped(spanEnd);
                 if (start < 0 || end <= start) continue;
+                if (!delta.RetainsAnyInRange(span.Start, spanEnd)) continue;
                 next.Add(new ProvenanceSpan(start, end - start, span.Kind, span.RecordedAt));
             }
             _spans.Clear();

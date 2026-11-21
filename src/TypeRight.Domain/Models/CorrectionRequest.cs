@@ -1,4 +1,3 @@
-#nullable disable
 namespace TypeRight.Domain.Models;
 
 /// <summary>
@@ -115,7 +114,7 @@ public readonly struct CapitalizationInfo
         if (string.IsNullOrEmpty(originalText))
             return new CapitalizationInfo(originalText, false, false);
 
-        bool isAllCaps = originalText.Equals(originalText, StringComparison.OrdinalIgnoreCase) &&
+        bool isAllCaps = originalText.Equals(originalText.ToUpperInvariant(), StringComparison.Ordinal) &&
                          originalText.Any(c => char.IsLetter(c));
         bool isSentenceStart = originalText.Length > 0 && char.IsUpper(originalText[0]);
 
@@ -249,25 +248,25 @@ public readonly struct CorrectionDecision
     /// <summary>
     /// Preserve the word as-is (no correction needed).
     /// </summary>
-    public static CorrectionDecision Preserve(string rationale = null)
+    public static CorrectionDecision Preserve(string? rationale = null)
         => new(CorrectionAction.Preserve, null, null, 0.0f, ReasonCategory.LowConfidence, rationale);
 
     /// <summary>
     /// Auto-correct with high confidence.
     /// </summary>
-    public static CorrectionDecision AutoCorrect(string correctedWord, float confidence, string rationale = null)
+    public static CorrectionDecision AutoCorrect(string correctedWord, float confidence, string? rationale = null)
         => new(CorrectionAction.AutoCorrect, correctedWord, null, confidence, ReasonCategory.AutoCorrect, rationale);
 
     /// <summary>
     /// Show suggestions with medium confidence.
     /// </summary>
-    public static CorrectionDecision Suggest(IReadOnlyList<string> alternatives, float confidence, string rationale = null)
+    public static CorrectionDecision Suggest(IReadOnlyList<string> alternatives, float confidence, string? rationale = null)
         => new(CorrectionAction.Suggest, null, alternatives, confidence, ReasonCategory.Suggest, rationale);
 
     /// <summary>
     /// Low confidence - leave the word alone.
     /// </summary>
-    public static CorrectionDecision LowConfidencePreserve(string rationale = null)
+    public static CorrectionDecision LowConfidencePreserve(string? rationale = null)
         => new(CorrectionAction.Preserve, null, null, 0.1f, ReasonCategory.LowConfidence, rationale);
 }
 

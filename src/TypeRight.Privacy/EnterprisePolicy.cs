@@ -101,6 +101,19 @@ namespace TypeRight.Privacy
             _rules = rules ?? IntegrationRuleset.LoadDefault();
         }
 
+        /// <summary>
+        /// True when any configured policy depends on process, domain or UI-element
+        /// context. A request without that context must be denied instead of being
+        /// evaluated against missing fields.
+        /// </summary>
+        public bool RequiresContext =>
+            !string.IsNullOrEmpty(_policy.EnrollmentToken) ||
+            !string.IsNullOrEmpty(_policy.BlockedClients) ||
+            !string.IsNullOrEmpty(_policy.BlockedDomains) ||
+            _policy.ConfidentialModeEnabled ||
+            _policy.DlpEnabled ||
+            !string.Equals(_policy.IntegrationMode, "full", StringComparison.OrdinalIgnoreCase);
+
         public PolicyDecision Evaluate(string processName, string domain, string focusedElement)
         {
             var reasons = new List<string>();

@@ -1,4 +1,3 @@
-#nullable disable
 namespace TypeRight.Engine.Tokenization;
 
 /// <summary>
@@ -99,22 +98,10 @@ public static class DamerauLevenshtein
         for (int j = 0; j <= m; j++)
             d[0, j] = j * costInsertion;
 
-        int[] lastA = new int[256];
-        int[] lastB = new int[256];
-        for (int i = 0; i < 256; i++)
-        {
-            lastA[i] = -1;
-            lastB[i] = -1;
-        }
-
         for (int i = 1; i <= n; i++)
         {
-            int db = 0;
             for (int j = 1; j <= m; j++)
             {
-                int i1 = lastA[b[j - 1]];
-                int j1 = lastB[a[i - 1]];
-
                 int cost = (a[i - 1] == b[j - 1]) ? 0 : costSubstitution;
 
                 d[i, j] = Math.Min(
@@ -125,11 +112,6 @@ public static class DamerauLevenshtein
                 {
                     d[i, j] = Math.Min(d[i, j], d[i - 2, j - 2] + costTransposition);
                 }
-
-                int tmp = db;
-                db = lastB[a[i - 1]];
-                lastB[a[i - 1]] = j;
-                lastA[b[j - 1]] = i;
             }
         }
 

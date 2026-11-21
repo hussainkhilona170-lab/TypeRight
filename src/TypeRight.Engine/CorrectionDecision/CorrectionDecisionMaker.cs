@@ -2,6 +2,8 @@
 using System;
 using TypeRight.Domain;
 using TypeRight.Engine;
+using TypeRight.Engine.Confidence;
+using TypeRight.Engine.Vocabulary;
 
 namespace TypeRight.Engine.CorrectionDecision;
 
@@ -57,7 +59,12 @@ public class CorrectionDecisionMaker : ICorrectionDecisionMaker
 
         if (isValid)
         {
-            return TypeRight.Domain.Models.CorrectionDecision.Preserve(
+            return new TypeRight.Domain.Models.CorrectionDecision(
+                TypeRight.Domain.Models.CorrectionAction.Preserve,
+                correctedWord: null,
+                alternatives: null,
+                confidence: 1.0f,
+                reason: TypeRight.Domain.Models.ReasonCategory.ValidWord,
                 rationale: $"Word '{request.CompletedWord}' is valid {request.LanguageVariant} vocabulary.");
         }
 
@@ -69,6 +76,7 @@ public class CorrectionDecisionMaker : ICorrectionDecisionMaker
         var candidates = _candidateGenerator.GenerateCandidates(
             request.CompletedWord,
             contextWords,
+            request.LanguageVariant,
             maxCandidates: 10);
 
         if (candidates.Count == 0)
@@ -85,51 +93,57 @@ public class CorrectionDecisionMaker : ICorrectionDecisionMaker
             request.AdjacentRight,
             request.LanguageVariant);
 
-        // Step 4: Calculate confidence and determine suggested action
-        var (confidence, suggestedAction) = _confidenceCalculator.CalculateConfidence(
+        // Step 4: Calculate a provisional confidence so that reason refinement
+        // can distinguish high-confidence matches from ambiguous ones.
+        var (provisionalConfidence, _) = _confidenceCalculator.CalculateConfidence(
             rankedCandidates,
             TypeRight.Domain.Models.ReasonCategory.AutoCorrect);
 
-        // Step 5: Refine the reason category based on analysis
+        // Step 5: Refine the reason category, then recalculate confidence with
+        // it. Categories such as regional variants and proper names must drive
+        // the action, not just be reported to callers.
         TypeRight.Domain.Models.ReasonCategory reasonCategory = RefineReasonCategory(
             rankedCandidates,
-            confidence,
+            provisionalConfidence,
             request.CompletedWord,
             request.LanguageVariant);
 
+        var (confidence, suggestedAction) = _confidenceCalculator.CalculateConfidence(
+            rankedCandidates,
+            reasonCategory);
+
         // Step 6: Apply correction priority philosophy
-        TypeRight.Domain.Models.CorrectionDecision decision;
+        TypeRight.Domain.Models.CorrectionAction action;
+        string correctedWord = null;
+        IReadOnlyList<string> alternatives = null;
+        string rationale;
 
         switch (suggestedAction)
         {
             case TypeRight.Domain.Models.CorrectionAction.AutoCorrect:
-                string correctedWord = rankedCandidates[0].Candidate;
-                decision = TypeRight.Domain.Models.CorrectionDecision.AutoCorrect(
-                    correctedWord: correctedWord,
-                    confidence: confidence,
-                    rationale: $"Auto-corrected '{request.CompletedWord}' to '{correctedWord}' based on {confidence:P0} confidence.");
+                action = TypeRight.Domain.Models.CorrectionAction.AutoCorrect;
+                correctedWord = rankedCandidates[0].Candidate;
+                rationale = $"Auto-corrected '{request.CompletedWord}' to '{correctedWord}' based on {confidence:P0} confidence.";
                 break;
 
             case TypeRight.Domain.Models.CorrectionAction.Suggest:
-                var alternatives = rankedCandidates
+                action = TypeRight.Domain.Models.CorrectionAction.Suggest;
+                alternatives = rankedCandidates
                     .Take(3)
                     .Select(c => c.Candidate)
                     .ToList();
-
-                decision = TypeRight.Domain.Models.CorrectionDecision.Suggest(
-                    alternatives: alternatives,
-                    confidence: confidence,
-                    rationale: $"Suggestion for '{request.CompletedWord}': top alternative '{rankedCandidates[0].Candidate}' with {confidence:P0} confidence.");
+                rationale = $"Suggestion for '{request.CompletedWord}': top alternative '{rankedCandidates[0].Candidate}' with {confidence:P0} confidence.";
                 break;
 
             case TypeRight.Domain.Models.CorrectionAction.Preserve:
             default:
-                decision = TypeRight.Domain.Models.CorrectionDecision.LowConfidencePreserve(
-                    rationale: $"Preserved '{request.CompletedWord}' - low confidence ({confidence:P0}) correction decision.");
+                action = TypeRight.Domain.Models.CorrectionAction.Preserve;
+                rationale = $"Preserved '{request.CompletedWord}' - {reasonCategory} decision ({confidence:P0} confidence).";
                 break;
         }
 
-        return decision;
+        return new TypeRight.Domain.Models.CorrectionDecision(
+            action, correctedWord, alternatives, confidence, reasonCategory, rationale);
     }
 
     /// <summary>
@@ -144,8 +158,6 @@ public class CorrectionDecisionMaker : ICorrectionDecisionMaker
         if (rankedCandidates.Count == 0)
             return TypeRight.Domain.Models.ReasonCategory.InsufficientData;
 
-        float topScore = rankedCandidates[0].FinalScore;
-
         bool isAmbiguous = IsLikelyAmbiguousWord(completedWord);
         if (isAmbiguous && confidence < 0.9f)
             return TypeRight.Domain.Models.ReasonCategory.Ambiguous;
@@ -157,9 +169,9 @@ public class CorrectionDecisionMaker : ICorrectionDecisionMaker
         if (IsLikelyProperNameOrTechnical(completedWord))
             return TypeRight.Domain.Models.ReasonCategory.ProperNameOrTechnical;
 
-        if (confidence >= 0.85f)
+        if (confidence >= ConfidenceThresholds.High)
             return TypeRight.Domain.Models.ReasonCategory.AutoCorrect;
-        if (confidence >= 0.65f)
+        if (confidence >= ConfidenceThresholds.Medium)
             return TypeRight.Domain.Models.ReasonCategory.Suggest;
         return TypeRight.Domain.Models.ReasonCategory.LowConfidence;
     }
@@ -178,38 +190,16 @@ public class CorrectionDecisionMaker : ICorrectionDecisionMaker
     private bool IsRegionalSpelling(string word, TypeRight.Domain.Models.LanguageVariant languageVariant)
     {
         if (languageVariant == TypeRight.Domain.Models.LanguageVariant.Auto) return false;
+        if (!RegionalSpelling.TryGetPair(word, out RegionalSpellingPair pair)) return false;
+        if (!pair.PreserveWhenVariantDiffers) return false;
 
-        var britishToAmerican = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["colour"] = "color",
-            ["organise"] = "organize",
-            ["centre"] = "center",
-            ["favourite"] = "favorite",
-            ["travelling"] = "traveling",
-            ["recognised"] = "recognized",
-            ["analyse"] = "analyze",
-            ["realise"] = "realize"
-        };
-
-        var americanToBritish = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["color"] = "colour",
-            ["organize"] = "organise",
-            ["center"] = "centre",
-            ["favorite"] = "favourite",
-            ["traveling"] = "travelling",
-            ["recognized"] = "recognised",
-            ["analyze"] = "analyse",
-            ["realize"] = "realise"
-        };
-
-        bool isBritish = britishToAmerican.ContainsKey(word);
-        bool isAmerican = americanToBritish.ContainsKey(word);
+        bool isBritishSpelling = string.Equals(word, pair.British, StringComparison.OrdinalIgnoreCase);
+        bool isAmericanSpelling = string.Equals(word, pair.American, StringComparison.OrdinalIgnoreCase);
 
         if (languageVariant == TypeRight.Domain.Models.LanguageVariant.EnUs)
-            return isBritish;
+            return isBritishSpelling;
         if (languageVariant == TypeRight.Domain.Models.LanguageVariant.EnGb)
-            return isAmerican;
+            return isAmericanSpelling;
 
         return false;
     }
@@ -221,7 +211,7 @@ public class CorrectionDecisionMaker : ICorrectionDecisionMaker
         bool hasInternalCapital = word.Any(c => char.IsUpper(c)) &&
                                   word.Any(c => char.IsLower(c));
 
-        bool isAllCaps = word.Equals(word, StringComparison.OrdinalIgnoreCase) &&
+        bool isAllCaps = word.Equals(word.ToUpperInvariant(), StringComparison.Ordinal) &&
                          word.Any(c => char.IsLetter(c));
 
         bool isShortCapitalized = word.Length >= 2 && word.Length <= 3 &&

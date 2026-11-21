@@ -64,10 +64,17 @@ namespace TypeRight.Suggestions
 
         public bool IsEnabled(FeatureKey key)
         {
-            return _overrides.TryGetValue(key, out bool value) ? value : Defaults[key];
+            if (!Enum.IsDefined(typeof(FeatureKey), key)) return false;
+            if (_overrides.TryGetValue(key, out bool value)) return value;
+            return Defaults.TryGetValue(key, out bool defaultValue) && defaultValue;
         }
 
-        public void Set(FeatureKey key, bool enabled) => _overrides[key] = enabled;
+        public void Set(FeatureKey key, bool enabled)
+        {
+            if (!Enum.IsDefined(typeof(FeatureKey), key))
+                throw new ArgumentOutOfRangeException(nameof(key));
+            _overrides[key] = enabled;
+        }
 
         public void Reset() => _overrides.Clear();
 

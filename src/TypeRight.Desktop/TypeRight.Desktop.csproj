@@ -17,13 +17,16 @@
     <ProjectReference Include="../TypeRight.Engine/TypeRight.Engine.csproj" />
     <ProjectReference Include="../TypeRight.Configuration/TypeRight.Configuration.csproj" />
     <ProjectReference Include="../TypeRight.Documents/TypeRight.Documents.csproj" />
+    <ProjectReference Include="../TypeRight.Privacy/TypeRight.Privacy.csproj" />
     <ProjectReference Include="../TypeRight.Suggestions/TypeRight.Suggestions.csproj" />
     <ProjectReference Include="../TypeRight.TsfBridge/TypeRight.TsfBridge.csproj" />
     <ProjectReference Include="../TypeRight.WPFOverlay/TypeRight.WPFOverlay.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\TypeRight.ico" />
+    <Resource Include="Resources\TypeRight.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

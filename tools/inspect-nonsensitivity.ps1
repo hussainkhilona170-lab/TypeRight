@@ -1,4 +1,5 @@
-$p = 'C:\Users\Administrator\Downloads\TypeRight!\src\TypeRight.Privacy\IntegrationOptions.json'
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$p = Join-Path $repoRoot 'src\TypeRight.Privacy\IntegrationOptions.json'
 $rules = [System.IO.File]::ReadAllText($p, (New-Object System.Text.UTF8Encoding $false)) | ConvertFrom-Json
 $ns = $rules | Where-Object { -not $_.IsSensitivityCheck }
 Write-Output ("Non-sensitivity rules: " + $ns.Count)

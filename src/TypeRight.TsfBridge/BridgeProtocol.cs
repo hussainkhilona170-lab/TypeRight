@@ -27,16 +27,22 @@ namespace TypeRight.TsfBridge
         public const string Denied = "DENY";
         public const string Err = "ERR";
 
+        // EVAL: <language> <word> <process> <domain> <element>
+        private const int MaxMetadataFieldBytes = 256;
+        private const int MaxWordBytes = MaxWordChars * 4;
+        private const int MaxSuggestions = 5;
+
         private static readonly char[] FieldSep = { '\t' };
 
         /// <summary>
         /// Parses a request line. Returns false if malformed (never throws on untrusted input).
+        /// The size check is on UTF-8 bytes, not UTF-16 chars.
         /// </summary>
         public static bool TryParseRequest(string line, out string opcode, out string language, out string word,
                                            out string process, out string domain, out string element)
         {
             opcode = language = word = process = domain = element = null;
-            if (string.IsNullOrEmpty(line) || line.Length > MaxLineBytes)
+            if (string.IsNullOrEmpty(line) || Encoding.UTF8.GetByteCount(line) > MaxLineBytes)
                 return false;
 
             string[] parts = line.Split(FieldSep);
@@ -79,19 +85,53 @@ namespace TypeRight.TsfBridge
         }
 
         /// <summary>
-        /// Formats a request line for the EVAL operation.
+        /// Formats a legacy request line for the EVAL operation.
         /// </summary>
         public static string FormatEval(string language, string word)
         {
-            return string.Join("\t", Eval, language ?? "auto", word ?? string.Empty);
+            return BuildEval(
+                SanitizeField(language, MaxMetadataFieldBytes),
+                SanitizeField(word, MaxWordBytes));
         }
 
         /// <summary>
-        /// Formats a response line. Suggestions are pipe-separated.
+        /// Formats a request line with process/domain/element policy context.
+        /// Empty domain/element values are valid; callers that cannot supply context
+        /// should use the legacy overload and accept the bridge's fail-closed policy.
+        /// </summary>
+        public static string FormatEval(string language, string word, string process, string domain, string element)
+        {
+            return BuildEval(
+                SanitizeField(language, MaxMetadataFieldBytes),
+                SanitizeField(word, MaxWordBytes),
+                SanitizeField(process, MaxMetadataFieldBytes),
+                SanitizeField(domain, MaxMetadataFieldBytes),
+                SanitizeField(element, MaxMetadataFieldBytes));
+        }
+
+        private static string BuildEval(params string[] fields)
+        {
+            // One tab before every field, and one for the opcode itself is not needed;
+            // there are exactly fields.Length separators after the opcode.
+            int budget = MaxLineBytes - Encoding.UTF8.GetByteCount(Eval) - fields.Length;
+            var sb = new StringBuilder();
+            sb.Append(Eval);
+            foreach (string field in fields)
+            {
+                string value = LimitUtf8(field ?? string.Empty, Math.Max(0, budget));
+                sb.Append('\t');
+                sb.Append(value);
+                budget -= Encoding.UTF8.GetByteCount(value);
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Formats a response line. Suggestions are tab-separated.
         /// </summary>
         public static string FormatAuto(string correctedWord)
         {
-            return OkAuto + "\t" + SanitizeField(correctedWord);
+            return OkAuto + "\t" + SanitizeField(correctedWord, MaxWordBytes);
         }
 
         public static string FormatSuggest(IReadOnlyList<string> suggestions)
@@ -101,12 +141,20 @@ namespace TypeRight.TsfBridge
 
             var sb = new StringBuilder();
             sb.Append(OkSuggest);
-            for (int i = 0; i < suggestions.Count && i < 5; i++)
+            int added = 0;
+            for (int i = 0; i < suggestions.Count && added < MaxSuggestions; i++)
             {
+                string suggestion = suggestions[i];
+                if (string.IsNullOrEmpty(suggestion)) continue;
+
+                string value = SanitizeField(suggestion, MaxWordBytes);
+                if (value.Length == 0) continue;
+
                 sb.Append('\t');
-                sb.Append(SanitizeField(suggestions[i]));
+                sb.Append(value);
+                added++;
             }
-            return sb.ToString();
+            return added == 0 ? OkNone : sb.ToString();
         }
 
         public static string FormatNone()
@@ -121,18 +169,48 @@ namespace TypeRight.TsfBridge
 
         public static string FormatError(string code)
         {
-            return Err + "\t" + SanitizeField(code ?? "unknown");
+            return Err + "\t" + SanitizeField(code ?? "unknown", MaxMetadataFieldBytes);
         }
 
         /// <summary>
-        /// Removes characters that would corrupt the line protocol.
+        /// Removes characters that would corrupt the line protocol and caps the
+        /// result by UTF-8 byte count so the MaxLineBytes contract is preserved.
         /// </summary>
-        private static string SanitizeField(string value)
+        private static string SanitizeField(string value, int maxBytes)
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value) || maxBytes <= 0)
                 return string.Empty;
 
-            return value.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ');
+            var sb = new StringBuilder(value.Length);
+            int bytes = 0;
+            foreach (char c in value)
+            {
+                char safe = (c == '\t' || c == '\r' || c == '\n') ? ' ' : c;
+                int size = Encoding.UTF8.GetByteCount(safe.ToString());
+                if (bytes + size > maxBytes)
+                    break;
+                sb.Append(safe);
+                bytes += size;
+            }
+            return sb.ToString();
+        }
+
+        private static string LimitUtf8(string value, int maxBytes)
+        {
+            if (string.IsNullOrEmpty(value) || maxBytes <= 0)
+                return string.Empty;
+
+            var sb = new StringBuilder(value.Length);
+            int bytes = 0;
+            foreach (char c in value)
+            {
+                int size = Encoding.UTF8.GetByteCount(c.ToString());
+                if (bytes + size > maxBytes)
+                    break;
+                sb.Append(c);
+                bytes += size;
+            }
+            return sb.ToString();
         }
     }
 }

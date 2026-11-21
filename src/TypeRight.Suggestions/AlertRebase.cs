@@ -25,6 +25,11 @@ namespace TypeRight.Suggestions
             if (delta == null) throw new ArgumentNullException(nameof(delta));
             if (alert.Range.Revision != delta.Revision)
                 return (null, AlertRebaseStatus.StaleRevision);
+            foreach (var sub in alert.SubAlerts)
+            {
+                if (sub == null || sub.Range.Revision != delta.Revision)
+                    return (null, AlertRebaseStatus.StaleRevision);
+            }
 
             var newRange = alert.Range.Rebase(delta);
             if (!newRange.HasValue)
@@ -40,7 +45,6 @@ namespace TypeRight.Suggestions
             var subAlerts = new List<SubAlert>();
             foreach (var sub in alert.SubAlerts)
             {
-                if (sub.Range.Revision != delta.Revision) continue;
                 var subRange = sub.Range.Rebase(delta);
                 if (!subRange.HasValue) continue;
 

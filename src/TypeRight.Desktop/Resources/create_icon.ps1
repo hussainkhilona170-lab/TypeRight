@@ -1,5 +1,20 @@
 Add-Type -AssemblyName System.Drawing
 
+# Save an ICO through a real HICON. Bitmap.Save(..., ImageFormat.Icon) is not
+# supported by GDI+ and throws, so build the icon from the bitmap's HICON.
+if (-not ('TypeRightIconNative' -as [type])) {
+  Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class TypeRightIconNative {
+  [DllImport("user32.dll", SetLastError = true)]
+  public static extern bool DestroyIcon(IntPtr hIcon);
+}
+"@
+}
+
+$icoPath = Join-Path $PSScriptRoot "TypeRight.ico"
+
 $bmp = New-Object System.Drawing.Bitmap 64, 64
 $g = [System.Drawing.Graphics]::FromImage($bmp)
 $g.Clear([System.Drawing.Color]::Transparent)
@@ -26,8 +41,22 @@ $brush.Dispose()
 $white.Dispose()
 $sf.Dispose()
 
-$icoPath = "C:\Users\Administrator\Downloads\TypeRight!\src\TypeRight.Desktop\Resources\TypeRight.ico"
-$bmp.Save($icoPath, [System.Drawing.Imaging.ImageFormat]::Icon)
-$bmp.Dispose()
+$hicon = $bmp.GetHicon()
+$icon = [System.Drawing.Icon]::FromHandle($hicon)
+try {
+  $stream = New-Object System.IO.MemoryStream
+  try {
+    $icon.Save($stream)
+    [System.IO.File]::WriteAllBytes($icoPath, $stream.ToArray())
+  }
+  finally {
+    $stream.Dispose()
+  }
+}
+finally {
+  $icon.Dispose()
+  [void][TypeRightIconNative]::DestroyIcon($hicon)
+  $bmp.Dispose()
+}
 
 Write-Host "Created $icoPath"

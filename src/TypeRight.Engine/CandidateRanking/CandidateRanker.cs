@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TypeRight.Domain.Models;
-using TypeRight.Engine;
 using TypeRight.Engine.CandidateGeneration;
 using TypeRight.Engine.Tokenization;
 
@@ -106,6 +105,20 @@ public class RankedCandidate
 /// </summary>
 public class ContextAwareRanker : ICandidateRanker
 {
+    private const float EditWeight = 0.30f;
+    private const float ContextWeight = 0.25f;
+    private const float FrequencyWeight = 0.38f;
+    private const float KeyboardWeight = 0.02f;
+    private const float NgramWeight = 0.05f;
+
+    private static readonly IReadOnlyDictionary<char, HashSet<char>> KeyboardNeighbors = BuildKeyboardNeighbors();
+
+    private static readonly HashSet<string> CommonAdjacentPairs = new(StringComparer.Ordinal)
+    {
+        "the|world", "hello|world", "of|the", "in|the", "to|the", "for|the", "on|the",
+        "the|test", "the|word", "hello|test", "a|word", "each|word", "my|word"
+    };
+
     private readonly IFrequencyProvider _frequencyProvider;
 
     /// <summary>
@@ -126,131 +139,202 @@ public class ContextAwareRanker : ICandidateRanker
         IReadOnlyList<string> adjacentRight,
         LanguageVariant languageVariant)
     {
-        var ranked = new List<RankedCandidate>();
+        if (candidates == null || candidates.Count == 0)
+            return Array.Empty<RankedCandidate>();
 
-        foreach (var candidate in candidates)
+        IReadOnlyList<string> left = adjacentLeft ?? Array.Empty<string>();
+        IReadOnlyList<string> right = adjacentRight ?? Array.Empty<string>();
+        string original = (completedWord ?? string.Empty).ToLowerInvariant();
+        var ranked = new List<RankedCandidate>(candidates.Count);
+
+        foreach (CandidateResult candidate in candidates)
         {
-            // 1. Edit distance factor
-            int editDist = DamerauLevenshtein.Distance(completedWord, candidate.Candidate);
-            float editScore = 1.0f - (editDist / (float)Math.Max(completedWord.Length, 1));
-            float editDistanceClamped = Math.Max(0, editScore);
+            string candidateText = candidate.Candidate ?? string.Empty;
+            string normalizedCandidate = candidateText.ToLowerInvariant();
 
-            // 2. Context match factor
-            float contextScore = ComputeContextMatch(candidate.Candidate, adjacentLeft, adjacentRight);
+            // 1. Edit distance factor (also consumes the generator's initial score).
+            int editDist = DamerauLevenshtein.Distance(original, normalizedCandidate);
+            int denominator = Math.Max(1, Math.Max(original.Length, normalizedCandidate.Length));
+            float distanceScore = Math.Clamp(1.0f - editDist / (float)denominator, 0.0f, 1.0f);
+            float initialScore = Math.Clamp(candidate.InitialScore, 0.0f, 1.0f);
+            float editScore = Math.Clamp((distanceScore * 0.7f) + (initialScore * 0.3f), 0.0f, 1.0f);
 
-            // 3. Frequency factor
-            float freqScore = _frequencyProvider.GetFrequencyScore(candidate.Candidate);
+            // 2. Context match factor (candidate-aware; neutral when no context exists).
+            float contextScore = ComputeContextMatch(candidateText, left, right);
 
-            // 4. Keyboard adjacency factor
-            float keyboardScore = ComputeKeyboardAdjacency(completedWord, candidate.Candidate);
+            // 3. Frequency factor.
+            float freqScore = Math.Clamp(_frequencyProvider.GetFrequencyScore(normalizedCandidate), 0.0f, 1.0f);
 
-            // 5. n-gram similarity factor
-            float ngramScore = ComputeNgramSimilarity(completedWord, candidate.Candidate);
+            // 4. QWERTY keyboard adjacency factor.
+            float keyboardScore = ComputeKeyboardAdjacency(original, normalizedCandidate);
 
-            // Weighted final score
+            // 5. Character n-gram similarity factor.
+            float ngramScore = ComputeNgramSimilarity(original, normalizedCandidate);
+
             float finalScore =
-                (editDistanceClamped * 0.35f) +
-                (contextScore * 0.30f) +
-                (freqScore * 0.20f) +
-                (keyboardScore * 0.10f) +
-                (ngramScore * 0.05f);
+                (editScore * EditWeight) +
+                (contextScore * ContextWeight) +
+                (freqScore * FrequencyWeight) +
+                (keyboardScore * KeyboardWeight) +
+                (ngramScore * NgramWeight);
 
             var factors = new RankedCandidate.Factor
             {
-                EditDistance = editDistanceClamped,
+                EditDistance = editScore,
                 ContextMatch = contextScore,
                 Frequency = freqScore,
                 KeyboardAdjacency = keyboardScore,
                 NgramSimilarity = ngramScore
             };
 
-            ranked.Add(new RankedCandidate(candidate.Candidate, finalScore, factors));
+            // Candidate text casing is preserved from the generator.
+            ranked.Add(new RankedCandidate(candidateText, finalScore, factors));
         }
 
-        // Sort by final score descending
-        ranked.Sort((a, b) => b.FinalScore.CompareTo(a.FinalScore));
+        ranked.Sort((a, b) =>
+        {
+            int scoreCompare = b.FinalScore.CompareTo(a.FinalScore);
+            if (scoreCompare != 0) return scoreCompare;
+
+            int ignoreCase = string.Compare(a.Candidate, b.Candidate, StringComparison.OrdinalIgnoreCase);
+            return ignoreCase != 0
+                ? ignoreCase
+                : string.Compare(a.Candidate, b.Candidate, StringComparison.Ordinal);
+        });
 
         return ranked;
     }
 
     /// <summary>
-    /// Computes context match based on adjacent words.
+    /// Computes a candidate-aware context score. With no adjacent words the
+    /// context is neutral (1.0), so a strong candidate can still auto-correct.
     /// </summary>
     private float ComputeContextMatch(string candidate, IReadOnlyList<string> left, IReadOnlyList<string> right)
     {
-        if (left.Count == 0 && right.Count == 0) return 0.5f;
+        if (left.Count == 0 && right.Count == 0) return 1.0f;
 
         float score = 0.5f;
+        foreach (string word in left.Take(2).Concat(right.Take(2)))
+            score += ComputeContextPairScore(word, candidate);
 
-        foreach (var word in left.Take(2))
-        {
-            score += 0.05f;
-        }
-
-        foreach (var word in right.Take(2))
-        {
-            score += 0.05f;
-        }
-
-        return Math.Min(1.0f, score);
+        return Math.Clamp(score, 0.0f, 1.0f);
     }
 
     /// <summary>
-    /// Computes keyboard adjacency scoring.
+    /// Scores a single adjacent word against a candidate using frequency,
+    /// character-bigram similarity and a small common word-pair map.
     /// </summary>
-    private float ComputeKeyboardAdjacency(string original, string candidate)
+    private float ComputeContextPairScore(string contextWord, string candidate)
     {
-        if (original == candidate) return 1.0f;
+        if (string.IsNullOrWhiteSpace(contextWord)) return 0.0f;
 
-        float score = 0.0f;
-        int matches = 0;
-        int minLen = Math.Min(original.Length, candidate.Length);
+        string ctx = contextWord.Trim().ToLowerInvariant();
+        string cand = (candidate ?? string.Empty).Trim().ToLowerInvariant();
+        if (ctx.Length == 0 || cand.Length == 0) return 0.0f;
+        if (string.Equals(ctx, cand, StringComparison.Ordinal)) return 0.5f;
+
+        float frequency = Math.Clamp(_frequencyProvider.GetFrequencyScore(cand), 0.0f, 1.0f);
+        float similarity = ComputeNgramSimilarity(ctx, cand);
+        float pairBonus = CommonAdjacentPairs.Contains(ctx + "|" + cand) ? 0.25f : 0.0f;
+
+        return Math.Clamp(0.1f + (frequency * 0.1f) + (similarity * 0.1f) + pairBonus, 0.0f, 0.25f);
+    }
+
+    /// <summary>
+    /// Computes keyboard adjacency using a QWERTY neighbor map.
+    /// </summary>
+    private static float ComputeKeyboardAdjacency(string original, string candidate)
+    {
+        string a = (original ?? string.Empty).ToLowerInvariant();
+        string b = (candidate ?? string.Empty).ToLowerInvariant();
+
+        if (string.Equals(a, b, StringComparison.Ordinal)) return 1.0f;
+        if (a.Length == 0 || b.Length == 0) return 0.0f;
+
+        int minLen = Math.Min(a.Length, b.Length);
+        int differences = Math.Abs(a.Length - b.Length);
+        int adjacent = 0;
 
         for (int i = 0; i < minLen; i++)
         {
-            if (original[i] == candidate[i])
-                matches++;
+            if (a[i] == b[i]) continue;
+
+            differences++;
+            if (KeyboardNeighbors.TryGetValue(a[i], out HashSet<char> neighbors) && neighbors.Contains(b[i]))
+                adjacent++;
         }
 
-        if (minLen > 0)
-            score = (float)matches / minLen;
-        else
-            score = 0.5f;
-
-        return score;
+        return differences == 0 ? 1.0f : Math.Clamp(adjacent / (float)differences, 0.0f, 1.0f);
     }
 
     /// <summary>
-    /// Computes n-gram similarity.
+    /// Computes character bigram similarity (case-insensitive).
     /// </summary>
-    private float ComputeNgramSimilarity(string a, string b)
+    private static float ComputeNgramSimilarity(string a, string b)
     {
-        if (a == b) return 1.0f;
-        if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return 0.0f;
+        string left = (a ?? string.Empty).ToLowerInvariant();
+        string right = (b ?? string.Empty).ToLowerInvariant();
 
-        var gramsA = GetBigrams(a);
-        var gramsB = GetBigrams(b);
+        if (string.Equals(left, right, StringComparison.Ordinal)) return 1.0f;
+        if (left.Length == 0 || right.Length == 0) return 0.0f;
 
+        HashSet<string> gramsA = GetBigrams(left);
+        HashSet<string> gramsB = GetBigrams(right);
         if (gramsA.Count == 0 || gramsB.Count == 0) return 0.5f;
 
         int intersection = gramsA.Intersect(gramsB).Count();
-        float similarity = (float)intersection / Math.Max(gramsA.Count, gramsB.Count);
-
-        return Math.Max(0, similarity);
+        return Math.Clamp(intersection / (float)Math.Max(gramsA.Count, gramsB.Count), 0.0f, 1.0f);
     }
 
     /// <summary>
     /// Gets character bigrams from a string.
     /// </summary>
-    private HashSet<string> GetBigrams(string text)
+    private static HashSet<string> GetBigrams(string text)
     {
-        var grams = new HashSet<string>();
-        if (string.IsNullOrEmpty(text) || text.Length < 2) return grams;
+        var grams = new HashSet<string>(StringComparer.Ordinal);
+        string normalized = (text ?? string.Empty).ToLowerInvariant();
+        if (normalized.Length < 2) return grams;
 
-        for (int i = 0; i < text.Length - 1; i++)
-        {
-            grams.Add(text.Substring(i, 2));
-        }
+        for (int i = 0; i < normalized.Length - 1; i++)
+            grams.Add(normalized.Substring(i, 2));
+
         return grams;
+    }
+
+    /// <summary>
+    /// Builds a QWERTY keyboard adjacency map (horizontal and diagonal neighbors).
+    /// </summary>
+    private static IReadOnlyDictionary<char, HashSet<char>> BuildKeyboardNeighbors()
+    {
+        string[] rows = { "qwertyuiop", "asdfghjkl", "zxcvbnm" };
+        var map = new Dictionary<char, HashSet<char>>();
+
+        for (int row = 0; row < rows.Length; row++)
+        {
+            for (int col = 0; col < rows[row].Length; col++)
+            {
+                char key = rows[row][col];
+                if (!map.TryGetValue(key, out HashSet<char> neighbors))
+                    map[key] = neighbors = new HashSet<char>();
+
+                for (int rowOffset = -1; rowOffset <= 1; rowOffset++)
+                {
+                    int neighborRow = row + rowOffset;
+                    if (neighborRow < 0 || neighborRow >= rows.Length) continue;
+
+                    for (int colOffset = -1; colOffset <= 1; colOffset++)
+                    {
+                        if (rowOffset == 0 && colOffset == 0) continue;
+
+                        int neighborCol = col + colOffset;
+                        if (neighborCol < 0 || neighborCol >= rows[neighborRow].Length) continue;
+
+                        neighbors.Add(rows[neighborRow][neighborCol]);
+                    }
+                }
+            }
+        }
+
+        return map;
     }
 }

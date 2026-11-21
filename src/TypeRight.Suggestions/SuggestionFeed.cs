@@ -30,27 +30,30 @@ namespace TypeRight.Suggestions
         public void Add(SuggestionAlert alert)
         {
             if (alert == null) return;
+            bool isNew = !_alerts.ContainsKey(alert.Id);
             _alerts[alert.Id] = alert;
-            _feedback.Add(new FeedbackEvent(FeedbackKind.AlertRendered, alert.Id, alert.Category));
+            if (isNew)
+                _feedback.Add(new FeedbackEvent(FeedbackKind.AlertRendered, alert.Id, alert.Category));
+        }
+
+        private static IOrderedEnumerable<SuggestionAlert> ByPriority(IEnumerable<SuggestionAlert> alerts)
+        {
+            return alerts
+                .OrderByDescending(a => a.Priority.Layer)
+                .ThenByDescending(a => a.Priority.Value)
+                .ThenByDescending(a => a.Confidence)
+                .ThenBy(a => a.Id);
         }
 
         /// <summary>Returns the highest-priority alert in a category.</summary>
         public SuggestionAlert Top(SuggestionCategory category)
         {
-            return _alerts.Values
-                .Where(a => a.Category == category)
-                .OrderByDescending(a => a.Priority.Layer)
-                .ThenByDescending(a => a.Priority.Value)
-                .ThenByDescending(a => a.Confidence)
-                .FirstOrDefault();
+            return ByPriority(_alerts.Values.Where(a => a.Category == category)).FirstOrDefault();
         }
 
         public IReadOnlyList<SuggestionAlert> ByCategory(SuggestionCategory category)
         {
-            return _alerts.Values
-                .Where(a => a.Category == category)
-                .OrderByDescending(a => a.Priority.Value)
-                .ToArray();
+            return ByPriority(_alerts.Values.Where(a => a.Category == category)).ToArray();
         }
 
         public IReadOnlyDictionary<SuggestionCategory, int> CountsByCategory()
@@ -74,7 +77,7 @@ namespace TypeRight.Suggestions
                 var (rebased, status) = AlertRebase.Rebase(alert, delta);
                 if (status == AlertRebaseStatus.Rebased && rebased != null)
                     next[rebased.Id] = rebased;
-                else
+                else if (status == AlertRebaseStatus.Deleted)
                     _feedback.Add(new FeedbackEvent(FeedbackKind.AcknowledgeAlert, alert.Id, alert.Category));
             }
             _alerts.Clear();
@@ -92,6 +95,9 @@ namespace TypeRight.Suggestions
             if (!_alerts.TryGetValue(alertId, out var alert)) return null;
             if (alert.Transform == null || document == null) return null;
             if (alternativeIndex < 0 || alternativeIndex >= alert.Transform.Alternatives.Count) return null;
+            if (alert.Range.Revision != document.Revision) return null;
+            if (alert.Range.Start < 0 || alert.Range.End > document.Length ||
+                alert.Range.End <= alert.Range.Start) return null;
             if (alert.Range.Length != alert.Transform.Context.Length) return null;
 
             var alternative = alert.Transform.Alternatives[alternativeIndex];

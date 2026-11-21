@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../../src/TypeRight.Engine/TypeRight.Engine.csproj" />
+  </ItemGroup>
+
 </Project>

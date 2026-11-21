@@ -51,14 +51,8 @@
     </Directory>
   </Fragment>
 
-  <Fragment>
-    <ComponentGroup Id="ApplicationComponents" Directory="AppFolder">
-      <!-- All published app files will be harvested by heat.exe during build -->
-      <Component Id="TypeRightExe" Guid="*">
-        <File Id="TypeRightExeFile" Source="$(var.PublishDir)TypeRight.exe" KeyPath="yes" />
-      </Component>
-    </ComponentGroup>
-  </Fragment>
+  <!-- The ApplicationComponents group (including TypeRight.exe) is generated
+       by heat.exe during the build; no duplicate executable component here. -->
 
   <Fragment>
     <ComponentGroup Id="ShortcutComponents">

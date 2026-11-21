@@ -1,5 +1,7 @@
 #nullable disable
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using TypeRight.Domain.Models;
 
 namespace TypeRight.Engine.Vocabulary;
@@ -28,6 +30,12 @@ public interface IDictionaryValidator
     /// <param name="considerVariants">Whether to consider regional spelling variants.</param>
     /// <returns>true if the word is valid or is a valid regional variant.</returns>
     bool IsValidWithVariants(string word, LanguageVariant languageVariant, bool considerVariants = true);
+
+    /// <summary>
+    /// All words known to this dictionary. Candidate generation iterates this
+    /// list instead of enumerating an artificial "all strings" universe.
+    /// </summary>
+    IEnumerable<string> Words => Array.Empty<string>();
 }
 
 /// <summary>
@@ -38,6 +46,7 @@ public class EmbeddedDictionaryValidator : IDictionaryValidator
     private readonly HashSet<string> _baseVocabulary;
     private readonly HashSet<string> _britishVariants;
     private readonly HashSet<string> _americanVariants;
+    private readonly HashSet<string> _personalWords;
     private readonly bool _considerVariants;
 
     /// <summary>
@@ -47,64 +56,96 @@ public class EmbeddedDictionaryValidator : IDictionaryValidator
     /// <param name="britishVariants">Set of words with British spellings (e.g., "colour").</param>
     /// <param name="americanVariants">Set of words with American spellings (e.g., "color").</param>
     /// <param name="considerVariants">Whether to accept regional variants.</param>
+    /// <param name="personalWords">Optional user-specific words to accept.</param>
     public EmbeddedDictionaryValidator(
         HashSet<string> baseVocabulary,
         HashSet<string> britishVariants,
         HashSet<string> americanVariants,
-        bool considerVariants = true)
+        bool considerVariants = true,
+        IEnumerable<string> personalWords = null)
     {
-        _baseVocabulary = baseVocabulary ?? throw new ArgumentNullException(nameof(baseVocabulary));
-        _britishVariants = britishVariants ?? throw new ArgumentNullException(nameof(britishVariants));
-        _americanVariants = americanVariants ?? throw new ArgumentNullException(nameof(americanVariants));
+        // Copy into case-insensitive sets so lookups never depend on the caller's comparer.
+        _baseVocabulary = new HashSet<string>(
+            baseVocabulary ?? throw new ArgumentNullException(nameof(baseVocabulary)),
+            StringComparer.OrdinalIgnoreCase);
+        _britishVariants = new HashSet<string>(
+            britishVariants ?? throw new ArgumentNullException(nameof(britishVariants)),
+            StringComparer.OrdinalIgnoreCase);
+        _americanVariants = new HashSet<string>(
+            americanVariants ?? throw new ArgumentNullException(nameof(americanVariants)),
+            StringComparer.OrdinalIgnoreCase);
+        _personalWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (personalWords != null)
+        {
+            foreach (string word in personalWords)
+            {
+                if (!string.IsNullOrWhiteSpace(word))
+                    _personalWords.Add(word.Trim());
+            }
+        }
+
         _considerVariants = considerVariants;
     }
 
     /// <summary>
-    /// Checks if a word is in the base vocabulary or approved variants.
+    /// All known words: base, personal and enabled regional variants.
+    /// </summary>
+    public IEnumerable<string> Words
+    {
+        get
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            IEnumerable<string> all = _baseVocabulary
+                .Concat(_personalWords)
+                .Concat(_britishVariants)
+                .Concat(_americanVariants);
+
+            foreach (string word in all)
+            {
+                if (seen.Add(word))
+                    yield return word;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if a word is in the base/personal vocabulary or approved variants.
     /// </summary>
     public bool IsValid(string word, LanguageVariant languageVariant)
-        => IsValidWithVariants(word, languageVariant, considerVariants: true);
+        => IsValidWithVariants(word, languageVariant, _considerVariants);
 
     /// <summary>
     /// Checks word validity considering regional spelling variants.
     /// </summary>
     public bool IsValidWithVariants(string word, LanguageVariant languageVariant, bool considerVariants = true)
     {
-        if (string.IsNullOrEmpty(word)) return false;
+        if (string.IsNullOrWhiteSpace(word)) return false;
 
         word = word.Trim();
 
-        // Check base vocabulary (case-insensitive)
-        if (_baseVocabulary.Contains(word, StringComparer.OrdinalIgnoreCase))
+        // Base vocabulary and personal dictionary are always accepted (case-insensitive).
+        if (_baseVocabulary.Contains(word) || _personalWords.Contains(word))
             return true;
 
-        // If not in base, check with variants consideration
-        if (!considerVariants) return false;
+        // The validator-level setting is a hard cap on variant acceptance.
+        if (!considerVariants || !_considerVariants) return false;
 
-        // Check regional spelling variants based on language variant
         switch (languageVariant)
         {
             case LanguageVariant.Auto:
-                // Accept both British and American variants
-                if (_britishVariants.Contains(word, StringComparer.OrdinalIgnoreCase))
-                    return true;
-                if (_americanVariants.Contains(word, StringComparer.OrdinalIgnoreCase))
-                    return true;
-                break;
+                // Accept both British and American variants.
+                return _britishVariants.Contains(word) || _americanVariants.Contains(word);
 
             case LanguageVariant.EnUs:
-                // Accept American variants and base vocab
-                if (_americanVariants.Contains(word, StringComparer.OrdinalIgnoreCase))
-                    return true;
-                break;
+                // Accept American variants in addition to the base vocabulary.
+                return _americanVariants.Contains(word);
 
             case LanguageVariant.EnGb:
-                // Accept British variants and base vocab
-                if (_britishVariants.Contains(word, StringComparer.OrdinalIgnoreCase))
-                    return true;
-                break;
-        }
+                // Accept British variants in addition to the base vocabulary.
+                return _britishVariants.Contains(word);
 
-        return false;
+            default:
+                return false;
+        }
     }
 }

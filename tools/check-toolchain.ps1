@@ -29,5 +29,9 @@ foreach ($p in $sdkPaths) {
 
 Write-Output ''
 Write-Output '=== dotnet SDKs ==='
-$dotnet = "C:\Users\Administrator\AppData\Local\Microsoft\dotnet\dotnet.exe"
-if (Test-Path $dotnet) { & $dotnet --list-sdks } else { Write-Output 'local dotnet SDK not found' }
+$dotnet = (Get-Command dotnet.exe -ErrorAction SilentlyContinue).Source
+if (-not $dotnet) {
+  $localDotnet = Join-Path $env:LOCALAPPDATA 'Microsoft\dotnet\dotnet.exe'
+  if (Test-Path $localDotnet) { $dotnet = $localDotnet }
+}
+if ($dotnet) { & $dotnet --list-sdks } else { Write-Output 'dotnet SDK not found' }
