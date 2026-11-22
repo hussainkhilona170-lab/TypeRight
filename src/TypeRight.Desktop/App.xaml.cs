@@ -1,16 +1,20 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Threading;
 using TypeRight.Configuration;
 using TypeRight.Engine;
 using TypeRight.Engine.CorrectionDecision;
 using TypeRight.Privacy;
 using TypeRight.Suggestions;
 using TypeRight.TsfBridge;
+using TypeRight.WPFOverlay;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using NotifyIcon = System.Windows.Forms.NotifyIcon;
@@ -28,6 +32,11 @@ namespace TypeRight.Desktop
         private CorrectionPipeServer _pipeServer;
         private MainWindow _mainWindow;
         private bool _serviceRunning;
+
+        private OverlayWindow _overlay;
+        private readonly object _overlayLock = new object();
+        private DispatcherTimer _overlayTimer;
+        private volatile string _activeSuggestionToken;
 
         /// <summary>
         /// Gets the application configuration.
@@ -90,6 +99,8 @@ namespace TypeRight.Desktop
                 var policy = new PolicyEvaluator(EnterprisePolicy.Load(), IntegrationRuleset.LoadDefault());
                 _pipeServer = new CorrectionPipeServer(_decisionMaker, _configuration, policy, Features,
                     () => _serviceRunning);
+                _pipeServer.SuggestionOffered += OnSuggestionOffered;
+                _pipeServer.SuggestionResolved += OnSuggestionResolved;
                 _pipeServer.Start();
 
                 // Initialize system tray
@@ -153,6 +164,8 @@ namespace TypeRight.Desktop
             toggleItem.Click += (s, e) =>
             {
                 _serviceRunning = !_serviceRunning;
+                if (!_serviceRunning)
+                    DismissActiveSuggestion();
                 toggleItem.Text = _serviceRunning ? "Pause Service" : "Resume Service";
                 statusItem.Text = _serviceRunning ? "Service: Running" : "Service: Paused";
                 _trayIcon.Text = _serviceRunning
@@ -216,6 +229,154 @@ namespace TypeRight.Desktop
         }
 
         /// <summary>
+        /// Bridge events arrive on pipe worker threads; all overlay work is
+        /// marshalled to the application Dispatcher.
+        /// </summary>
+        private void OnSuggestionOffered(object sender, SuggestionOfferedEventArgs e)
+        {
+            Dispatcher.InvokeAsync(() => ShowOverlayFor(e));
+        }
+
+        private void OnSuggestionResolved(object sender, SuggestionResolvedEventArgs e)
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (string.IsNullOrEmpty(e.Token) || e.Token == _activeSuggestionToken)
+                    HideOverlay();
+            });
+        }
+
+        private void ShowOverlayFor(SuggestionOfferedEventArgs e)
+        {
+            try
+            {
+                if (e.Suggestions == null || e.Suggestions.Count == 0)
+                    return;
+
+                EnsureOverlay();
+
+                // A single overlay instance: a newer word replaces an older offer.
+                string previous = _activeSuggestionToken;
+                if (!string.IsNullOrEmpty(previous) && previous != e.Token)
+                    _pipeServer?.DismissSuggestion(previous);
+
+                _activeSuggestionToken = e.Token;
+                _overlay.SetStatus("Choose a suggestion");
+                _overlay.SetSuggestions(e.Suggestions.ToList());
+
+                var anchor = GetAnchorPoint();
+                _overlay.ShowAt(anchor.X + 8, anchor.Y + 8);
+                StartOverlayTimer();
+            }
+            catch (Exception)
+            {
+                // Never surface exception text or word content from the UI path.
+                HideOverlay();
+            }
+        }
+
+        private void EnsureOverlay()
+        {
+            lock (_overlayLock)
+            {
+                if (_overlay != null) return;
+                _overlay = new OverlayWindow();
+                _overlay.SuggestionSelectedIndexed += OnOverlaySuggestionSelected;
+            }
+        }
+
+        private void OnOverlaySuggestionSelected(object sender, SuggestionSelectionEventArgs e)
+        {
+            string token = _activeSuggestionToken;
+            if (token != null)
+                _pipeServer?.TryResolveSuggestion(token, e.Index);
+            HideOverlay();
+        }
+
+        private void StartOverlayTimer()
+        {
+            _overlayTimer?.Stop();
+            if (_overlayTimer != null)
+                _overlayTimer.Tick -= OnOverlayTimerTick;
+
+            _overlayTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            _overlayTimer.Tick += OnOverlayTimerTick;
+            _overlayTimer.Start();
+        }
+
+        private void OnOverlayTimerTick(object sender, EventArgs e)
+        {
+            _overlayTimer?.Stop();
+            string token = _activeSuggestionToken;
+            if (token != null)
+                _pipeServer?.DismissSuggestion(token);
+            HideOverlay();
+        }
+
+        private void DismissActiveSuggestion()
+        {
+            string token = _activeSuggestionToken;
+            _activeSuggestionToken = null;
+            if (token != null)
+                _pipeServer?.DismissSuggestion(token);
+            Dispatcher.InvokeAsync(HideOverlay);
+        }
+
+        private void HideOverlay()
+        {
+            _activeSuggestionToken = null;
+            if (_overlayTimer != null)
+            {
+                _overlayTimer.Stop();
+                _overlayTimer.Tick -= OnOverlayTimerTick;
+                _overlayTimer = null;
+            }
+            _overlay?.Dismiss();
+        }
+
+        /// <summary>
+        /// Anchors the overlay near the focused element, falling back to the
+        /// pointer and finally the work-area centre. No caret coordinates cross
+        /// the pipe, so the native client cannot provide a more precise anchor.
+        /// </summary>
+        private System.Windows.Point GetAnchorPoint()
+        {
+            try
+            {
+                var focused = AutomationElement.FocusedElement;
+                var rect = focused.Current.BoundingRectangle;
+                if (!rect.IsEmpty && rect.Width > 0 && rect.Height > 0)
+                    return DeviceToDip(rect.Right, rect.Bottom);
+            }
+            catch (Exception)
+            {
+                // UI Automation is optional; fall through to the pointer.
+            }
+
+            var cursor = System.Windows.Forms.Cursor.Position;
+            return DeviceToDip(cursor.X, cursor.Y);
+        }
+
+        private static System.Windows.Point DeviceToDip(double x, double y)
+        {
+            try
+            {
+                using (var graphics = Graphics.FromHwnd(IntPtr.Zero))
+                {
+                    if (graphics.DpiX > 0 && graphics.DpiY > 0)
+                        return new System.Windows.Point(
+                            x * 96.0 / graphics.DpiX,
+                            y * 96.0 / graphics.DpiY);
+                }
+            }
+            catch (Exception)
+            {
+                // Fall back to one-to-one coordinates.
+            }
+            return new System.Windows.Point(x, y);
+        }
+
+        /// <summary>
         /// Shows the main window and brings it to foreground.
         /// </summary>
         public void ShowMainWindow()
@@ -269,6 +430,28 @@ namespace TypeRight.Desktop
         {
             // Save configuration on exit. A failed write must not prevent cleanup.
             try { _configuration?.Save(); } catch { }
+
+            // Stop observing before cleanup so no callback reaches a closed overlay.
+            if (_pipeServer != null)
+            {
+                _pipeServer.SuggestionOffered -= OnSuggestionOffered;
+                _pipeServer.SuggestionResolved -= OnSuggestionResolved;
+            }
+
+            string token = _activeSuggestionToken;
+            _activeSuggestionToken = null;
+            try
+            {
+                if (token != null) _pipeServer?.DismissSuggestion(token);
+            }
+            catch { }
+            try
+            {
+                if (_overlayTimer != null) _overlayTimer.Stop();
+                _overlay?.Close();
+                _overlay = null;
+            }
+            catch { }
 
             // Stop the TSF bridge
             _pipeServer?.Dispose();

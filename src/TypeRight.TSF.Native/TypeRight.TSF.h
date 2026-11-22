@@ -12,6 +12,7 @@
 #include <shlobj.h>
 #include <msctf.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <atomic>
 #include <new>
@@ -33,11 +34,26 @@ void Event(const wchar_t* event, HRESULT hr = S_OK, unsigned long extra = 0);
 // Named pipe client to the managed correction bridge. Bounded and cancellable.
 // ---------------------------------------------------------------------------
 namespace PipeClient {
+std::wstring CurrentProcessName();
+
+// AUTO writes outPayload; SUG writes outToken plus outSuggestions.
 bool TryEvaluate(const std::wstring& language,
                  const std::wstring& word,
                  std::wstring& outOpcode,
                  std::wstring& outPayload,
+                 std::wstring& outToken,
+                 std::vector<std::wstring>& outSuggestions,
                  DWORD timeoutMs = 200);
+
+// Native-initiated long poll for a user selection. The reply is an ACK with a
+// closed-set status and either an offered replacement or a reason code.
+bool TryApply(const std::wstring& token,
+              const std::wstring& process,
+              const std::wstring& domain,
+              const std::wstring& element,
+              std::wstring& outStatus,
+              std::wstring& outPayload,
+              DWORD timeoutMs = 6000);
 }
 
 // ---------------------------------------------------------------------------
@@ -111,9 +127,11 @@ private:
     HRESULT DispatchRequest(PendingRequest* request);
     static unsigned WINAPI WorkerThread(LPVOID param);
 
-    HRESULT ApplySuggestion(PendingRequest* request,
-                            const std::wstring& opcode,
-                            const std::wstring& payload);
+    // Takes ownership of request (including its COM references).
+    HRESULT ApplySuggestion(PendingRequest* request, const std::wstring& payload);
+
+    // Releases any suggestions waiting on a user click when the document changes.
+    void InvalidatePendingRequests();
 
     bool IsExcludedApplication();
     void BumpCounter(const char* name);
@@ -131,6 +149,10 @@ private:
     DWORD _cookieTextEditSink;
     ITfSource* _sourceThreadMgr;
     ITfSource* _sourceContext;
+
+    // Suggestions waiting for selection, keyed by opaque bridge token.
+    std::unordered_map<std::wstring, PendingRequest*> _pending;
+    CRITICAL_SECTION _pendingLock;
 };
 
 // ---------------------------------------------------------------------------

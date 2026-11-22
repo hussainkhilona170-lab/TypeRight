@@ -13,11 +13,21 @@ namespace TypeRight.WPFOverlay
     public partial class OverlayWindow : Window
     {
         private bool _suggestionsInitialized;
+        private int _suggestionCount;
 
         /// <summary>
         /// Raised with the suggestion text when the user picks a suggestion.
+        /// Kept for simple consumers; indexed selection is preferred because
+        /// duplicate strings are otherwise ambiguous.
         /// </summary>
         public event EventHandler<string> SuggestionSelected;
+
+        /// <summary>
+        /// Raised with the zero-based alternative index when the user picks a
+        /// suggestion. All public overlay methods must be called on the window's
+        /// owning Dispatcher.
+        /// </summary>
+        public event EventHandler<SuggestionSelectionEventArgs> SuggestionSelectedIndexed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OverlayWindow"/> class.
@@ -68,6 +78,7 @@ namespace TypeRight.WPFOverlay
                 return;
 
             suggestionsPanel.Children.Clear();
+            _suggestionCount = 0;
             if (suggestions == null)
                 return;
 
@@ -75,10 +86,11 @@ namespace TypeRight.WPFOverlay
             {
                 if (string.IsNullOrEmpty(suggestion)) continue;
 
+                int index = _suggestionCount++;
                 var suggestionText = new TextBlock
                 {
                     Text = suggestion,
-                    Tag = suggestion,
+                    Tag = index,
                     Margin = new Thickness(5),
                     Cursor = Cursors.Hand
                 };
@@ -116,11 +128,20 @@ namespace TypeRight.WPFOverlay
         }
 
         /// <summary>
-        /// Hides the overlay.
+        /// Hides the overlay without tearing it down so it can be reused.
         /// </summary>
         public new void Hide()
         {
             base.Hide();
+        }
+
+        /// <summary>
+        /// Dismisses the current suggestion. Correlation state is owned by the
+        /// caller, so this only hides the window.
+        /// </summary>
+        public void Dismiss()
+        {
+            Hide();
         }
 
         /// <summary>
@@ -134,14 +155,18 @@ namespace TypeRight.WPFOverlay
         private void OnSuggestionsMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var source = e.OriginalSource as FrameworkElement;
-            string suggestion = source?.Tag as string;
-            if (string.IsNullOrEmpty(suggestion) && source is TextBlock text)
-                suggestion = text.Text;
-            if (string.IsNullOrEmpty(suggestion))
+            int? index = source?.Tag as int?;
+            string suggestion = source is TextBlock text ? text.Text : source?.Tag as string;
+            if ((!index.HasValue || index.Value < 0 || index.Value >= _suggestionCount) &&
+                string.IsNullOrEmpty(suggestion))
                 return; // click on empty panel space, not on a suggestion
 
             e.Handled = true;
-            SuggestionSelected?.Invoke(this, suggestion);
+            if (index.HasValue && index.Value >= 0 && index.Value < _suggestionCount)
+                SuggestionSelectedIndexed?.Invoke(this,
+                    new SuggestionSelectionEventArgs(index.Value, suggestion));
+            else
+                SuggestionSelected?.Invoke(this, suggestion);
             this.Close();
         }
     }

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.IO.Pipes;
 using System.Security.Principal;
 using System.Text;
@@ -25,6 +27,16 @@ namespace TypeRight.TsfBridge
         private const int DefaultMaxConcurrentClients = 8;
         private static readonly TimeSpan DefaultEngineTimeout = TimeSpan.FromMilliseconds(200);
         private static readonly TimeSpan DisposeWaitTimeout = TimeSpan.FromSeconds(2);
+        private static readonly TimeSpan DefaultSelectionTimeout = TimeSpan.FromSeconds(5);
+
+        /// <summary>Raised when suggestions are ready for a UI to display.</summary>
+        public event EventHandler<SuggestionOfferedEventArgs> SuggestionOffered;
+
+        /// <summary>Raised when a pending selection resolves so a UI can dismiss.</summary>
+        public event EventHandler<SuggestionResolvedEventArgs> SuggestionResolved;
+
+        private readonly ConcurrentDictionary<string, PendingSuggestion> _pendingSuggestions =
+            new ConcurrentDictionary<string, PendingSuggestion>();
 
         private readonly ICorrectionDecisionMaker _decisionMaker;
         private readonly ConfigurationSettings _configuration;
@@ -38,6 +50,29 @@ namespace TypeRight.TsfBridge
         private CancellationTokenSource _cts;
         private Task _loop;
         private bool _disposed;
+
+        private sealed class PendingSuggestion
+        {
+            public string[] Suggestions { get; set; } = Array.Empty<string>();
+            public string Process { get; set; }
+            public string Domain { get; set; }
+            public string Element { get; set; }
+            public DateTimeOffset ExpiresAt { get; set; }
+            public TaskCompletionSource<SuggestionSelection> Completion { get; } =
+                new TaskCompletionSource<SuggestionSelection>(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+
+        private sealed class SuggestionSelection
+        {
+            public string Status { get; }
+            public string Value { get; }
+
+            public SuggestionSelection(string status, string value)
+            {
+                Status = status;
+                Value = value;
+            }
+        }
 
         public CorrectionPipeServer(ICorrectionDecisionMaker decisionMaker, ConfigurationSettings configuration)
             : this(decisionMaker, configuration, null, null, null)
@@ -207,27 +242,36 @@ namespace TypeRight.TsfBridge
                         string line = await readTask.ConfigureAwait(false);
                         if (line == null) break; // client closed
 
-                        // Time-box the whole engine call, not just the pipe read.
-                        var engineTask = Task.Run(() => ProcessRequest(line));
                         string response;
-                        try
+                        if (BridgeProtocol.TryParseApply(line, out _, out _, out _, out _))
                         {
-                            var engineCompleted = await Task.WhenAny(
-                                engineTask, Task.Delay(_engineTimeout, outerToken)).ConfigureAwait(false);
-                            if (engineCompleted != engineTask)
+                            // Selection waits are user-driven, not engine work. They
+                            // use their own bounded timeout in HandleApplyAsync.
+                            response = await ProcessApplyAsync(line, outerToken).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            // Time-box the whole engine call, not just the pipe read.
+                            var engineTask = Task.Run(() => ProcessRequest(line));
+                            try
+                            {
+                                var engineCompleted = await Task.WhenAny(
+                                    engineTask, Task.Delay(_engineTimeout, outerToken)).ConfigureAwait(false);
+                                if (engineCompleted != engineTask)
+                                {
+                                    ObserveFault(engineTask);
+                                    response = BridgeProtocol.FormatError("engine_timeout");
+                                }
+                                else
+                                {
+                                    response = await engineTask.ConfigureAwait(false);
+                                }
+                            }
+                            catch (OperationCanceledException)
                             {
                                 ObserveFault(engineTask);
-                                response = BridgeProtocol.FormatError("engine_timeout");
+                                break;
                             }
-                            else
-                            {
-                                response = await engineTask.ConfigureAwait(false);
-                            }
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            ObserveFault(engineTask);
-                            break;
                         }
 
                         await writer.WriteLineAsync(response).ConfigureAwait(false);
@@ -268,27 +312,8 @@ namespace TypeRight.TsfBridge
             if (opcode == BridgeProtocol.Ping)
                 return BridgeProtocol.FormatPong();
 
-            if (!_isCorrectionEnabled())
-                return BridgeProtocol.FormatDeny();
-
-            if (IsApplicationExcluded(process))
-                return BridgeProtocol.FormatDeny();
-
-            if (_policyEvaluator != null)
-            {
-                bool hasContextFrame = process != null && domain != null && element != null;
-                if (_policyEvaluator.RequiresContext &&
-                    (string.IsNullOrEmpty(process) || !hasContextFrame))
-                    return BridgeProtocol.FormatDeny();
-
-                var policy = _policyEvaluator.Evaluate(process, domain, element);
-                if (!policy.AllowCorrection)
-                    return BridgeProtocol.FormatDeny();
-            }
-
-            // The local feature gate can disable proofreading at runtime without
-            // tearing down the native TSF service.
-            if (_features != null && !_features.IsActive(FeatureKey.Proofreader))
+            string denyReason = IsCorrectionAllowed(process, domain, element);
+            if (denyReason != null)
                 return BridgeProtocol.FormatDeny();
 
             LanguageVariant variant = ParseLanguage(language);
@@ -313,15 +338,13 @@ namespace TypeRight.TsfBridge
                         if (string.IsNullOrEmpty(decision.CorrectedWord))
                             return BridgeProtocol.FormatNone();
                         if (belowThreshold)
-                            return _configuration.ShowSuggestions
-                                ? BridgeProtocol.FormatSuggest(new[] { decision.CorrectedWord })
-                                : BridgeProtocol.FormatNone();
+                            return OfferSuggestions(language, word, process, domain, element,
+                                new[] { decision.CorrectedWord });
                         return BridgeProtocol.FormatAuto(decision.CorrectedWord);
 
                     case CorrectionAction.Suggest:
-                        if (!_configuration.ShowSuggestions)
-                            return BridgeProtocol.FormatNone();
-                        return BridgeProtocol.FormatSuggest(decision.Alternatives);
+                        return OfferSuggestions(language, word, process, domain, element,
+                            decision.Alternatives);
 
                     default:
                         return BridgeProtocol.FormatNone();
@@ -331,6 +354,174 @@ namespace TypeRight.TsfBridge
             {
                 return BridgeProtocol.FormatError("engine_fault");
             }
+        }
+
+        /// <summary>
+        /// Processes a native APPLY line. Public for headless protocol tests.
+        /// </summary>
+        public async Task<string> ProcessApplyAsync(string line, CancellationToken cancellationToken = default)
+        {
+            if (!BridgeProtocol.TryParseApply(line, out var token, out _, out _, out _))
+                return BridgeProtocol.FormatError("bad_request");
+            return await HandleApplyAsync(token, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<string> HandleApplyAsync(string token, CancellationToken outerToken)
+        {
+            if (!_pendingSuggestions.TryGetValue(token, out var pending))
+                return BridgeProtocol.FormatAck(token, BridgeProtocol.AckNone, BridgeProtocol.ReasonNotFound);
+
+            try
+            {
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(outerToken);
+                var remaining = pending.ExpiresAt - DateTimeOffset.UtcNow;
+                if (remaining <= TimeSpan.Zero)
+                {
+                    CompletePending(token, pending, BridgeProtocol.AckNone, BridgeProtocol.ReasonExpired);
+                    return BridgeProtocol.FormatAck(token, BridgeProtocol.AckNone, BridgeProtocol.ReasonExpired);
+                }
+
+                cts.CancelAfter(remaining);
+                var selection = await pending.Completion.Task.WaitAsync(cts.Token).ConfigureAwait(false);
+                return BridgeProtocol.FormatAck(token, selection.Status, selection.Value);
+            }
+            catch (OperationCanceledException)
+            {
+                CompletePending(token, pending, BridgeProtocol.AckNone, BridgeProtocol.ReasonExpired);
+                return BridgeProtocol.FormatAck(token, BridgeProtocol.AckNone, BridgeProtocol.ReasonExpired);
+            }
+            catch (Exception)
+            {
+                return BridgeProtocol.FormatAck(token, BridgeProtocol.AckNone, BridgeProtocol.ReasonNotFound);
+            }
+        }
+
+        private string OfferSuggestions(string language, string word, string process, string domain,
+                                        string element, IEnumerable<string> suggestions)
+        {
+            if (!_configuration.ShowSuggestions)
+                return BridgeProtocol.FormatNone();
+
+            var values = (suggestions ?? Array.Empty<string>())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Take(5)
+                .ToArray();
+            if (values.Length == 0)
+                return BridgeProtocol.FormatNone();
+
+            string token = Guid.NewGuid().ToString("N");
+            var pending = new PendingSuggestion
+            {
+                Suggestions = values,
+                Process = process,
+                Domain = domain,
+                Element = element,
+                ExpiresAt = DateTimeOffset.UtcNow.Add(DefaultSelectionTimeout)
+            };
+            _pendingSuggestions[token] = pending;
+
+            try
+            {
+                SuggestionOffered?.Invoke(this, new SuggestionOfferedEventArgs(
+                    token, language, word, process, domain, element, values));
+            }
+            catch (Exception)
+            {
+                // A UI fault must not leave a long-poll waiting on the native side.
+                CompletePending(token, pending, BridgeProtocol.AckNone, BridgeProtocol.ReasonNotFound);
+                return BridgeProtocol.FormatNone();
+            }
+
+            return BridgeProtocol.FormatSuggest(token, values);
+        }
+
+        /// <summary>
+        /// Resolves a pending suggestion by index. Rechecks gates before returning
+        /// the replacement so a pause or policy change cannot be bypassed by a click.
+        /// </summary>
+        public bool TryResolveSuggestion(string token, int alternativeIndex)
+        {
+            if (!BridgeProtocol.IsValidToken(token) ||
+                !_pendingSuggestions.TryGetValue(token, out var pending))
+                return false;
+
+            if (pending.ExpiresAt <= DateTimeOffset.UtcNow)
+            {
+                CompletePending(token, pending, BridgeProtocol.AckNone, BridgeProtocol.ReasonExpired);
+                return false;
+            }
+
+            if (alternativeIndex < 0 || alternativeIndex >= pending.Suggestions.Length)
+                return false;
+
+            string denyReason = !_configuration.ShowSuggestions
+                ? BridgeProtocol.ReasonSuggestionsOff
+                : IsCorrectionAllowed(pending.Process, pending.Domain, pending.Element);
+
+            if (denyReason != null)
+            {
+                CompletePending(token, pending, BridgeProtocol.AckDeny, denyReason);
+                return true;
+            }
+
+            CompletePending(token, pending, BridgeProtocol.AckOk, pending.Suggestions[alternativeIndex]);
+            return true;
+        }
+
+        /// <summary>Dismisses a pending suggestion without applying anything.</summary>
+        public void DismissSuggestion(string token)
+        {
+            if (!BridgeProtocol.IsValidToken(token) ||
+                !_pendingSuggestions.TryGetValue(token, out var pending))
+                return;
+
+            CompletePending(token, pending, BridgeProtocol.AckNone, BridgeProtocol.ReasonCancelled);
+        }
+
+        private void CompletePending(string token, PendingSuggestion pending, string status, string value)
+        {
+            if (!_pendingSuggestions.TryRemove(token, out var removed) || !ReferenceEquals(removed, pending))
+                return;
+            if (!pending.Completion.TrySetResult(new SuggestionSelection(status, value)))
+                return;
+
+            try
+            {
+                SuggestionResolved?.Invoke(this, new SuggestionResolvedEventArgs(token, status));
+            }
+            catch (Exception)
+            {
+                // UI observers are optional; never let a handler fault escape.
+            }
+        }
+
+        /// <summary>
+        /// Shared enforcement for EVAL and selection resolution. Returns a fixed
+        /// reason code when correction is not allowed, or null when it is.
+        /// </summary>
+        private string IsCorrectionAllowed(string process, string domain, string element)
+        {
+            if (!_isCorrectionEnabled())
+                return BridgeProtocol.ReasonServicePaused;
+            if (IsApplicationExcluded(process))
+                return BridgeProtocol.ReasonExcludedApp;
+
+            if (_policyEvaluator != null)
+            {
+                bool hasContextFrame = process != null && domain != null && element != null;
+                if (_policyEvaluator.RequiresContext &&
+                    (string.IsNullOrEmpty(process) || !hasContextFrame))
+                    return BridgeProtocol.ReasonPolicyDenied;
+
+                var policy = _policyEvaluator.Evaluate(process, domain, element);
+                if (!policy.AllowCorrection)
+                    return BridgeProtocol.ReasonPolicyDenied;
+            }
+
+            if (_features != null && !_features.IsActive(FeatureKey.Proofreader))
+                return BridgeProtocol.ReasonFeatureOff;
+
+            return null;
         }
 
         /// <summary>
@@ -383,6 +574,9 @@ namespace TypeRight.TsfBridge
         {
             if (_disposed) return;
             _disposed = true;
+
+            foreach (var pending in _pendingSuggestions.ToArray())
+                CompletePending(pending.Key, pending.Value, BridgeProtocol.AckNone, BridgeProtocol.ReasonCancelled);
 
             try { _cts?.Cancel(); } catch { }
 

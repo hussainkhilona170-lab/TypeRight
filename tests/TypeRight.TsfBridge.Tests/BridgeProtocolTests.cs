@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Text;
 using TypeRight.TsfBridge;
 using Xunit;
@@ -70,6 +72,62 @@ namespace TypeRight.TsfBridge.Tests
                 new[] { "one\ttwo", "a\rb", "c", "d", "e", "f" });
 
             Assert.Equal("SUG\tone two\ta b\tc\td\te", result);
+        }
+
+        [Fact]
+        public void FormatSuggest_WithToken_KeepsTokenAndAlternatives()
+        {
+            string token = Guid.NewGuid().ToString("N");
+
+            var line = BridgeProtocol.FormatSuggest(token, new[] { "world", "", "word" });
+
+            var parts = line.Split('\t');
+            Assert.Equal(BridgeProtocol.OkSuggest, parts[0]);
+            Assert.Equal(token, parts[1]);
+            Assert.Equal(new[] { "world", "word" }, parts.Skip(2));
+        }
+
+        [Fact]
+        public void TryParseApply_ValidatesTokenAndFields()
+        {
+            string token = Guid.NewGuid().ToString("N");
+            var line = BridgeProtocol.FormatApply(token, "notepad.exe", "example.com", "Email body");
+
+            Assert.True(BridgeProtocol.TryParseApply(line, out var parsedToken, out var process,
+                out var domain, out var element));
+            Assert.Equal(token, parsedToken);
+            Assert.Equal("notepad.exe", process);
+            Assert.Equal("example.com", domain);
+            Assert.Equal("Email body", element);
+
+            Assert.False(BridgeProtocol.TryParseApply(
+                "APPLY\tnot-a-token\tnotepad.exe\t\t", out _, out _, out _, out _));
+        }
+
+        [Fact]
+        public void FormatAck_RoundTripsStatusAndValue()
+        {
+            string token = Guid.NewGuid().ToString("N");
+
+            var ok = BridgeProtocol.FormatAck(token, BridgeProtocol.AckOk, "world");
+            Assert.True(BridgeProtocol.TryParseAck(ok, out var okToken, out var okStatus, out var okValue));
+            Assert.Equal(token, okToken);
+            Assert.Equal(BridgeProtocol.AckOk, okStatus);
+            Assert.Equal("world", okValue);
+
+            var denied = BridgeProtocol.FormatAck(token, BridgeProtocol.AckDeny,
+                BridgeProtocol.ReasonServicePaused);
+            Assert.True(BridgeProtocol.TryParseAck(denied, out _, out var denyStatus, out var denyValue));
+            Assert.Equal(BridgeProtocol.AckDeny, denyStatus);
+            Assert.Equal(BridgeProtocol.ReasonServicePaused, denyValue);
+        }
+
+        [Fact]
+        public void IsValidToken_RejectsArbitraryText()
+        {
+            Assert.False(BridgeProtocol.IsValidToken("world"));
+            Assert.False(BridgeProtocol.IsValidToken(new string('a', 32) + "\t"));
+            Assert.True(BridgeProtocol.IsValidToken("0123456789abcdef0123456789abcdef"));
         }
     }
 }

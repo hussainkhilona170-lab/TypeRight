@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using TypeRight.Configuration;
 using TypeRight.Domain.Models;
 using TypeRight.Engine.CorrectionDecision;
@@ -62,7 +63,12 @@ namespace TypeRight.TsfBridge.Tests
             var maker = new StubDecisionMaker(Decision.AutoCorrect("world", 0.7f));
             using (var server = new CorrectionPipeServer(maker, configuration))
             {
-                Assert.Equal("SUG\tworld", server.ProcessRequest(Eval()));
+                var response = server.ProcessRequest(Eval());
+                var parts = response.Split('\t');
+
+                Assert.Equal(BridgeProtocol.OkSuggest, parts[0]);
+                Assert.True(BridgeProtocol.IsValidToken(parts[1]));
+                Assert.Equal("world", parts[2]);
             }
         }
 
@@ -138,6 +144,104 @@ namespace TypeRight.TsfBridge.Tests
             {
                 Assert.Equal("AUTO\tworld", server.ProcessRequest(Eval()));
                 Assert.Equal(1, maker.CallCount);
+            }
+        }
+
+        [Fact]
+        public void SuggestionOffered_IncludesTokenAndContext()
+        {
+            var maker = new StubDecisionMaker(Decision.Suggest(new[] { "world" }, 0.9f));
+            using (var server = new CorrectionPipeServer(maker, new ConfigurationSettings()))
+            {
+                SuggestionOfferedEventArgs offered = null;
+                server.SuggestionOffered += (_, args) => offered = args;
+
+                var response = server.ProcessRequest(Eval());
+                string token = response.Split('\t')[1];
+
+                Assert.NotNull(offered);
+                Assert.Equal(token, offered.Token);
+                Assert.Equal("wrold", offered.Word);
+                Assert.Equal("notepad.exe", offered.Process);
+                Assert.Single(offered.Suggestions);
+                Assert.Equal("world", offered.Suggestions[0]);
+            }
+        }
+
+        [Fact]
+        public async Task Apply_ResolvesSelectedAlternative()
+        {
+            var maker = new StubDecisionMaker(Decision.Suggest(new[] { "world", "word" }, 0.9f));
+            using (var server = new CorrectionPipeServer(maker, new ConfigurationSettings()))
+            {
+                var response = server.ProcessRequest(Eval());
+                string token = response.Split('\t')[1];
+                var apply = server.ProcessApplyAsync(
+                    BridgeProtocol.FormatApply(token, "notepad.exe", string.Empty, string.Empty));
+
+                Assert.True(server.TryResolveSuggestion(token, 1));
+                var ack = await apply;
+
+                Assert.True(BridgeProtocol.TryParseAck(ack, out _, out var status, out var value));
+                Assert.Equal(BridgeProtocol.AckOk, status);
+                Assert.Equal("word", value);
+            }
+        }
+
+        [Fact]
+        public async Task Apply_DismissedSuggestionReturnsCancelled()
+        {
+            var maker = new StubDecisionMaker(Decision.Suggest(new[] { "world" }, 0.9f));
+            using (var server = new CorrectionPipeServer(maker, new ConfigurationSettings()))
+            {
+                var response = server.ProcessRequest(Eval());
+                string token = response.Split('\t')[1];
+                var apply = server.ProcessApplyAsync(
+                    BridgeProtocol.FormatApply(token, "notepad.exe", string.Empty, string.Empty));
+
+                server.DismissSuggestion(token);
+                var ack = await apply;
+
+                Assert.True(BridgeProtocol.TryParseAck(ack, out _, out var status, out var value));
+                Assert.Equal(BridgeProtocol.AckNone, status);
+                Assert.Equal(BridgeProtocol.ReasonCancelled, value);
+            }
+        }
+
+        [Fact]
+        public async Task Apply_PausedAfterOfferIsDenied()
+        {
+            bool paused = false;
+            var maker = new StubDecisionMaker(Decision.Suggest(new[] { "world" }, 0.9f));
+            using (var server = new CorrectionPipeServer(maker, new ConfigurationSettings(), null, null, () => !paused))
+            {
+                var response = server.ProcessRequest(Eval());
+                string token = response.Split('\t')[1];
+                var apply = server.ProcessApplyAsync(
+                    BridgeProtocol.FormatApply(token, "notepad.exe", string.Empty, string.Empty));
+
+                paused = true;
+                Assert.True(server.TryResolveSuggestion(token, 0));
+                var ack = await apply;
+
+                Assert.True(BridgeProtocol.TryParseAck(ack, out _, out var status, out var value));
+                Assert.Equal(BridgeProtocol.AckDeny, status);
+                Assert.Equal(BridgeProtocol.ReasonServicePaused, value);
+            }
+        }
+
+        [Fact]
+        public async Task Apply_UnknownTokenReturnsNotFound()
+        {
+            var maker = new StubDecisionMaker(Decision.Preserve());
+            using (var server = new CorrectionPipeServer(maker, new ConfigurationSettings()))
+            {
+                var ack = await server.ProcessApplyAsync(BridgeProtocol.FormatApply(
+                    Guid.NewGuid().ToString("N"), "notepad.exe", string.Empty, string.Empty));
+
+                Assert.True(BridgeProtocol.TryParseAck(ack, out _, out var status, out var value));
+                Assert.Equal(BridgeProtocol.AckNone, status);
+                Assert.Equal(BridgeProtocol.ReasonNotFound, value);
             }
         }
     }

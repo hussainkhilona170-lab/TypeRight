@@ -1,4 +1,5 @@
 #include "TypeRight.TSF.h"
+#include <algorithm>
 #include <wctype.h>
 
 namespace TypeRight {
@@ -8,6 +9,17 @@ struct WorkerParams
     CTextService* service;
     PendingRequest* request;
 };
+
+constexpr DWORD kSelectionTimeoutMs = 6000;
+
+// A PendingRequest owns one reference to its context and document from capture
+// until the request is deleted. Edit sessions take ownership of that reference.
+static void ReleaseRequestResources(PendingRequest* request)
+{
+    if (!request) return;
+    if (request->context) { request->context->Release(); request->context = nullptr; }
+    if (request->document) { request->document->Release(); request->document = nullptr; }
+}
 
 // ---------------------------------------------------------------------------
 // A dedicated edit-session object per correction. RequestEditSession requires
@@ -20,14 +32,11 @@ public:
                       const std::wstring& opcode, const std::wstring& payload)
         : _ref(1), _service(service), _request(request), _opcode(opcode), _payload(payload)
     {
-        _request->context->AddRef();
-        _request->document->AddRef();
     }
 
     virtual ~CApplyEditSession()
     {
-        _request->context->Release();
-        _request->document->Release();
+        ReleaseRequestResources(_request);
         delete _request;
     }
 
@@ -87,8 +96,8 @@ public:
                 break;
             }
 
-            // Suggestions are surfaced to the managed overlay; never auto-applied.
-            if (_opcode != L"AUTO" || _payload.empty())
+            // SUG is only an offer; the explicit SELECT opcode comes from a user click.
+            if ((_opcode != L"AUTO" && _opcode != L"SELECT") || _payload.empty())
             {
                 Diagnostics::Event(L"edit_session_suggest_only", S_OK, (unsigned long)cch);
                 hr = S_FALSE;
@@ -130,6 +139,7 @@ CTextService::CTextService()
       _document(nullptr), _context(nullptr), _cookieThreadMgrSink(0), _cookieTextEditSink(0),
       _sourceThreadMgr(nullptr), _sourceContext(nullptr)
 {
+    InitializeCriticalSection(&_pendingLock);
 }
 
 CTextService::~CTextService()
@@ -137,6 +147,7 @@ CTextService::~CTextService()
     DetachDocument();
     UnadviseSinks();
     if (_threadMgr) _threadMgr->Release();
+    DeleteCriticalSection(&_pendingLock);
 }
 
 STDMETHODIMP CTextService::QueryInterface(REFIID riid, void** ppv)
@@ -277,6 +288,9 @@ HRESULT CTextService::AttachDocument(ITfDocumentMgr* pdim)
 
 void CTextService::DetachDocument()
 {
+    // No suggestion may be applied after the document or focus changes.
+    InvalidatePendingRequests();
+
     if (_sourceContext && _cookieTextEditSink)
     {
         _sourceContext->Unadvise(_cookieTextEditSink);
@@ -397,14 +411,20 @@ HRESULT CTextService::CaptureCompletedWord(ITfContext* pic, TfEditCookie ec)
         if (!request) { hr = E_OUTOFMEMORY; break; }
 
         request->context = pic;
+        if (request->context) request->context->AddRef();
         request->document = _document;
+        if (request->document) request->document->AddRef();
         request->word.assign(text + begin, wordLen);
         request->startOffset = begin;
         request->endOffset = end;
         request->language = L"auto";
 
         hr = DispatchRequest(request);
-        if (FAILED(hr)) delete request;
+        if (FAILED(hr))
+        {
+            ReleaseRequestResources(request);
+            delete request;
+        }
         Diagnostics::Event(L"word_captured", hr, (unsigned long)wordLen);
     } while (false);
 
@@ -459,6 +479,8 @@ HRESULT CTextService::DispatchRequest(PendingRequest* request)
     {
         Release();
         delete params;
+        ReleaseRequestResources(request);
+        delete request;
         InterlockedDecrement(&s_activeWorkers);
         return E_FAIL;
     }
@@ -474,12 +496,15 @@ unsigned WINAPI CTextService::WorkerThread(LPVOID param)
     PendingRequest* request = params->request;
     delete params;
 
-    std::wstring opcode, payload;
-    bool ok = PipeClient::TryEvaluate(request->language, request->word, opcode, payload, 250);
+    std::wstring opcode, payload, token;
+    std::vector<std::wstring> suggestions;
+    bool ok = PipeClient::TryEvaluate(request->language, request->word, opcode,
+                                      payload, token, suggestions, 250);
     Diagnostics::Event(ok ? L"pipe_response" : L"pipe_unavailable",
-                       ok ? S_OK : E_FAIL, (unsigned long)(ok ? payload.size() : 0));
+                       ok ? S_OK : E_FAIL,
+                       (unsigned long)(ok ? payload.size() + token.size() + suggestions.size() : 0));
 
-    if (ok)
+    if (ok && opcode == L"AUTO" && !payload.empty() && request->context)
     {
         CApplyEditSession* session = new (std::nothrow)
             CApplyEditSession(service, request, opcode, payload);
@@ -491,14 +516,76 @@ unsigned WINAPI CTextService::WorkerThread(LPVOID param)
                 service->_clientId, session, TF_ES_ASYNC | TF_ES_READWRITE, nullptr);
             Diagnostics::Event(L"edit_session_requested", hr);
             if (FAILED(hr))
+                session->Release(); // destructor frees the request
+            // On success TSF owns the edit session's initial reference.
+            request = nullptr;
+        }
+    }
+    else if (ok && opcode == L"SUG" && !token.empty() && !suggestions.empty())
+    {
+        bool stored = false;
+        EnterCriticalSection(&service->_pendingLock);
+        if (service->_active)
+        {
+            service->_pending[token] = request;
+            stored = true;
+        }
+        LeaveCriticalSection(&service->_pendingLock);
+
+        if (!stored)
+        {
+            Diagnostics::Event(L"suggestion_service_inactive");
+            ReleaseRequestResources(request);
+            delete request;
+            request = nullptr;
+        }
+        else
+        {
+            // Ownership moved to the pending map; release it only after ACK.
+            request = nullptr;
+
+            std::wstring status, replacement;
+            std::wstring process = PipeClient::CurrentProcessName();
+            bool acked = PipeClient::TryApply(token, process, L"", L"",
+                                              status, replacement, kSelectionTimeoutMs);
+
+            PendingRequest* selected = nullptr;
+            bool contextCurrent = false;
+            EnterCriticalSection(&service->_pendingLock);
+            auto it = service->_pending.find(token);
+            if (it != service->_pending.end())
             {
-                // Release destroys the session, whose destructor frees the request.
-                session->Release();
-                request = nullptr;
+                selected = it->second;
+                service->_pending.erase(it);
+                contextCurrent = service->_active && service->_document == selected->document;
+            }
+            LeaveCriticalSection(&service->_pendingLock);
+
+            if (!selected || !contextCurrent)
+            {
+                // A document/focus change already invalidated this request.
+                Diagnostics::Event(L"apply_stale");
+                if (selected)
+                {
+                    ReleaseRequestResources(selected);
+                    delete selected;
+                }
+            }
+            else if (acked && status == L"OK" && !replacement.empty() &&
+                     std::find(suggestions.begin(), suggestions.end(), replacement) != suggestions.end())
+            {
+                Diagnostics::Event(L"apply_ack_ok", S_OK, (unsigned long)replacement.size());
+                service->ApplySuggestion(selected, replacement); // takes ownership
             }
             else
             {
-                request = nullptr; // ownership transferred to session
+                if (!acked)
+                    Diagnostics::Event(L"apply_timeout", E_FAIL);
+                else
+                    Diagnostics::Event(status == L"DENY" ? L"apply_ack_deny" : L"apply_ack_none",
+                                       S_OK, (unsigned long)status.size());
+                ReleaseRequestResources(selected);
+                delete selected;
             }
         }
     }
@@ -507,6 +594,51 @@ unsigned WINAPI CTextService::WorkerThread(LPVOID param)
     InterlockedDecrement(&s_activeWorkers);
     service->Release();
     return 0;
+}
+
+HRESULT CTextService::ApplySuggestion(PendingRequest* request, const std::wstring& payload)
+{
+    if (!request || !request->context || payload.empty())
+    {
+        ReleaseRequestResources(request);
+        delete request;
+        Diagnostics::Event(L"apply_invalid_request", E_INVALIDARG);
+        return E_INVALIDARG;
+    }
+
+    CApplyEditSession* session = new (std::nothrow)
+        CApplyEditSession(this, request, L"SELECT", payload);
+    if (!session)
+    {
+        ReleaseRequestResources(request);
+        delete request;
+        Diagnostics::Event(L"apply_session_failed", E_OUTOFMEMORY);
+        return E_OUTOFMEMORY;
+    }
+
+    HRESULT hr = request->context->RequestEditSession(
+        _clientId, session, TF_ES_ASYNC | TF_ES_READWRITE, nullptr);
+    Diagnostics::Event(L"apply_session_requested", hr, (unsigned long)payload.size());
+    if (FAILED(hr)) session->Release(); // destructor frees the request
+    return hr;
+}
+
+void CTextService::InvalidatePendingRequests()
+{
+    std::vector<PendingRequest*> stale;
+    EnterCriticalSection(&_pendingLock);
+    for (auto& item : _pending)
+        stale.push_back(item.second);
+    _pending.clear();
+    LeaveCriticalSection(&_pendingLock);
+
+    for (PendingRequest* request : stale)
+    {
+        ReleaseRequestResources(request);
+        delete request;
+    }
+    if (!stale.empty())
+        Diagnostics::Event(L"pending_invalidated", S_OK, (unsigned long)stale.size());
 }
 
 bool CTextService::IsExcludedApplication()

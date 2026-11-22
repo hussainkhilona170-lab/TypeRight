@@ -1,7 +1,7 @@
 # ADR-005: Suggestion Overlay Implementation
 
 ## Status
-Proposed
+Accepted — non-activating overlay is wired to the managed bridge and native TSF replacement.
 
 ## Context
 The suggestion overlay is the primary user-facing feature of TypeRight. It must be unobtrusive, focus-preserving, and reliable. The previous TypeRight implementation had issues with focus stealing, flickering, duplicate windows, and inappropriate positioning.
@@ -115,6 +115,23 @@ Use a lightweight, non-activating WPF popup that appears above the target applic
 8. New word: hide previous popup, show new one
 9. Application deactivation: fade or dismiss
 ```
+
+### Implemented selection flow
+
+- A `SUG` response carries an opaque token. The bridge raises `SuggestionOffered`;
+  the desktop app marshals it to the Dispatcher and reuses one overlay window.
+- Clicking an alternative raises an indexed selection event (duplicates remain
+  unambiguous) and calls `TryResolveSuggestion`. Gates are rechecked before the
+  bridge returns `ACK\t<token>\tOK\t<replacement>`.
+- The native service keeps the captured TSF context alive with an explicit
+  reference, waits on a separate `APPLY` connection, verifies the token and that
+  the replacement was actually offered, then applies it in a fresh `SELECT`
+  edit session. The existing offset/word staleness check still applies.
+- Document detach, focus change, pause, timeout or a new offer dismisses the
+  pending suggestion. The overlay sets `ShowInTaskbar="False"` and never calls
+  `Activate()` or `Focus()`.
+- Caret coordinates are not in the protocol; the managed app anchors near the
+  focused UI Automation element, then the pointer, then the work-area centre.
 
 ## Trade-offs
 - **Positive**: Focus-preserving; no taskbar interference; works across monitors; DPI-aware; reduced-motion compatible; flicker-free; click-through for mouse events; immediate undo

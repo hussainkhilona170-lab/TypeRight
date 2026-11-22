@@ -49,8 +49,9 @@ unless they can be implemented locally and privately.
 ### Windows text integration
 
 - Native TSF text service under `src/TypeRight.TSF.Native`.
-- Local named-pipe bridge `TypeRight.Correction.2` connecting native TSF to the managed engine.
+- Local named-pipe bridge `TypeRight.Correction.3` connecting native TSF to the managed engine.
 - Versioned 6-field `EVAL` request: language, word, process, domain and focused UI element; legacy 3-field requests are parsed but denied when policy requires context.
+- Token-bearing `SUG` response plus native-initiated `APPLY`/`ACK` selection with closed-set reason codes and rechecked gates.
 - Bounded UTF-8 framing, sanitised fields, per-request engine timeout and a bounded concurrent-client cap.
 - Current-user-only pipe ACL; no user text in logs or diagnostics.
 - Legacy `TypeRightEngine` wrapper is wired to the real engine pipeline with fail-closed fallback on fault.
@@ -91,7 +92,8 @@ unless they can be implemented locally and privately.
 - WPF tray application with status, active-feature count, Open, Settings, Pause/Resume and Exit actions.
 - Embedded/copied tray icon with safe fallback.
 - Settings window for language variant, confidence threshold, personal learning, exclusions and suggestion visibility, including an “Add word” action for the local dictionary.
-- Non-activating, non-focusable suggestion overlay with work-area clamping and a `SuggestionSelected` event.
+- Non-activating, non-focusable, single-instance suggestion overlay with work-area clamping, indexed selection, Dispatcher marshalling, auto-dismiss and no taskbar button.
+- Overlay selection resolves through the bridge to a token-validated TSF replacement; stale, paused or unoffered values are rejected before any edit.
 - Generic startup error messages; exception text and paths are never shown to the user.
 
 ### Configuration, persistence and tooling
@@ -108,8 +110,8 @@ unless they can be implemented locally and privately.
 | Check | Result |
 |---|---|
 | `dotnet build TypeRight.slnx --nologo -v minimal` | 0 warnings, 0 errors |
-| `dotnet test TypeRight.slnx --nologo -v minimal` | 160 passed, 0 failed, 0 skipped |
-| Test projects | Domain 17, Engine 66, Documents 46, Privacy 12, Configuration 5, TsfBridge 14 |
+| `dotnet test TypeRight.slnx --nologo -v minimal` | 169 passed, 0 failed, 0 skipped |
+| Test projects | Domain 17, Engine 66, Documents 46, Privacy 12, Configuration 5, TsfBridge 23 |
 | Native C++ build | Not run locally — MSVC/Windows SDK are not installed in this environment |
 
 ---
@@ -119,8 +121,8 @@ unless they can be implemented locally and privately.
 These are implemented or partially implemented but still need end-to-end
 validation or wiring before being considered done.
 
-1. **Native TSF toolchain validation.** The protocol and native client code are written, but the C++ projects cannot be compiled locally without MSVC and the Windows SDK. A real-app smoke test is still required.
-2. **Overlay-to-replacement loop.** `OverlayWindow` can display suggestions, clamp its position, stay non-activating and raise `SuggestionSelected`; production wiring from a `SUG` bridge response to overlay display and TSF replacement is still pending.
+1. **Native TSF toolchain validation.** The v3 protocol, token correlation and TSF lifetime handling are written, but the C++ projects cannot be compiled locally without MSVC and the Windows SDK. A real-app smoke test is still required.
+2. **Overlay polish.** Mouse selection, auto-dismiss, pause dismissal and single-instance reuse are wired; keyboard navigation, host-deactivation dismissal and accessibility polish are still open.
 3. **Installer/release validation.** Scripts parse and the WiX document is well-formed, but a clean machine install/upgrade/uninstall run has not yet been performed. Signing and auto-update are not implemented.
 4. **Local feature matrix expansion.** Cloud-dependent agents are correctly gated off; additional offline-correctness and local-style checks need careful privacy review before activation.
 5. **Native diagnostics without content.** Event-only diagnostics exist; a local, content-free health view would improve supportability without introducing telemetry.
@@ -132,7 +134,7 @@ validation or wiring before being considered done.
 ### Next
 
 - [ ] Compile and smoke-test the native TSF components with MSVC/Windows SDK on a Windows desktop session.
-- [ ] Wire `SUG` responses through the desktop app into the overlay and apply the selected replacement via a validated TSF edit.
+- [x] Wire `SUG` responses through the desktop app into the overlay and apply the selected replacement via a validated TSF edit.
 - [x] Load personal SQLite words into the engine at startup and add words from the local settings UI.
 - [ ] Add protocol fuzz/integration tests for truncated, oversized and malformed pipe input.
 - [ ] Run a full installer install → upgrade → uninstall verification on a clean VM.
@@ -173,7 +175,7 @@ validation or wiring before being considered done.
 ### Engineering quality
 
 - Managed solution builds with 0 warnings and 0 errors.
-- Full managed test suite stays green on every commit; current baseline is 160 tests.
+- Full managed test suite stays green on every commit; current baseline is 169 tests.
 - New behaviour requires tests; safety-critical behaviour requires negative tests.
 - `plan.md`, `README.md` and relevant ADRs are kept consistent with the code.
 
@@ -214,7 +216,8 @@ Rules for this table:
 |---|---|---|---|---|
 | 2026-11-21 | `15810cc` | Port local Grammarly feature patterns: sensitivity rules, policy gates, revisioned deltas, alert feed and feature matrix | Baseline build/tests | [15810cc](https://github.com/hussainkhilona170-lab/TypeRight/commit/15810cc) |
 | 2026-11-21 | `e09d3e4` | Harden correction pipeline: real engine wiring, embedded vocabulary/ranking/rebasing safety, 6-field pipe protocol with fail-closed policy, tenant-safe tooling/installer, overlay/tray fixes, TsfBridge tests, and establish `plan.md` as the project source of truth | Build 0 warnings/0 errors; 153/153 tests passed | [e09d3e4](https://github.com/hussainkhilona170-lab/TypeRight/commit/e09d3e4490fc9e30d600090e186a3dfecd1ed372) |
-| 2026-11-22 | Current | Complete the opt-in personal dictionary round-trip: safe SQLite load/store with canonical case-insensitive words, reloadable engine, settings UI “Add word” action, Configuration test project and plan/test-count sync | Build 0 warnings/0 errors; 160/160 tests passed | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
+| 2026-11-22 | `952b4af` | Complete the opt-in personal dictionary round-trip: safe SQLite load/store with canonical case-insensitive words, reloadable engine, settings UI “Add word” action, Configuration test project and plan/test-count sync | Build 0 warnings/0 errors; 160/160 tests passed | [952b4af](https://github.com/hussainkhilona170-lab/TypeRight/commit/952b4afbd9b621a978818e8ea43e986a943ba095) |
+| 2026-11-22 | Current | Wire the overlay-to-replacement loop end to end: protocol v3 with token-bearing `SUG`, native `APPLY`/`ACK`, Dispatcher-marshalled indexed overlay selection, gate rechecks, TSF reference lifetime/invalidation fixes and 9 new protocol tests | Build 0 warnings/0 errors; 169/169 tests passed; native C++ smoke test still pending | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
 
 > At push time, the exact commit URL for the current row is reported in the push output and final handoff. Future commits must replace the history link with their own exact GitHub commit URL.
 

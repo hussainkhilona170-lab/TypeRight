@@ -33,15 +33,25 @@ again, so stale requests are discarded.
 
 ## Implemented protocol
 
-- Pipe: `\\.\pipe\TypeRight.Correction.2`, byte transmission mode, current-user
-  access control only.
+- Pipe: `\\.\pipe\TypeRight.Correction.3`, byte transmission mode, current-user
+  access control only. Version 3 is required because `SUG` now carries a token
+  and selection uses a second native-initiated `APPLY` request.
 - Framing: one UTF-8 line per request and one UTF-8 line per response.
-- Request: `EVAL\t<language>\t<word>`, word limited to 128 characters.
-- Response: `AUTO\t<word>`, `SUG\t<alternatives...>`, `NONE`, `DENY` or `ERR`.
-- Timeouts: the native client waits at most 250 ms; the bridge always answers
+- Evaluation request: `EVAL\t<language>\t<word>\t<process>\t<domain>\t<element>`;
+  a 3-field legacy form is accepted but fails closed when policy needs context.
+- Auto response: `AUTO\t<word>`. Suggestion response:
+  `SUG\t<token>\t<alternatives...>`. Terminal responses: `NONE`, `DENY`, `ERR`.
+- Selection request: `APPLY\t<token>\t<process>\t<domain>\t<element>`. The bridge
+  long-polls until the user clicks, the 5 s selection window expires, or policy
+  changes, then returns `ACK\t<token>\t<status>\t<value>`. `status` is `OK`,
+  `DENY` or `NONE`; `value` is either the exact offered replacement or a
+  closed-set reason code. Tokens are opaque GUIDs, never user text.
+- Timeouts: evaluation uses 250 ms native / 200 ms engine bounds; selection uses
+  a 6 s native bound around the bridge's 5 s bound. The bridge always answers
   with a bounded line and never includes exception text or user text in logs.
 - Policy and feature gates are enforced in the managed bridge before any
-  decision is returned; `DENY` means no correction and no suggestion.
+  decision is returned and again before a selection is acknowledged; `DENY`
+  means no correction and no suggestion.
 
 Protobuf was considered as a versioned schema but is not used: the line
 protocol is simpler, bounded and sufficient for one completed word at a time.
