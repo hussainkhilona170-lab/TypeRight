@@ -52,6 +52,7 @@ unless they can be implemented locally and privately.
 - Local named-pipe bridge `TypeRight.Correction.3` connecting native TSF to the managed engine.
 - Versioned 6-field `EVAL` request: language, word, process, domain and focused UI element; legacy 3-field requests are parsed but denied when policy requires context.
 - Token-bearing `SUG` response plus native-initiated `APPLY`/`ACK` selection with closed-set reason codes and rechecked gates.
+- Malformed, oversized, wrong-opcode and unknown-status inputs fail closed; ACK values use the full word byte budget so offered replacements are not truncated.
 - Bounded UTF-8 framing, sanitised fields, per-request engine timeout and a bounded concurrent-client cap.
 - Current-user-only pipe ACL; no user text in logs or diagnostics.
 - Legacy `TypeRightEngine` wrapper is wired to the real engine pipeline with fail-closed fallback on fault.
@@ -110,8 +111,8 @@ unless they can be implemented locally and privately.
 | Check | Result |
 |---|---|
 | `dotnet build TypeRight.slnx --nologo -v minimal` | 0 warnings, 0 errors |
-| `dotnet test TypeRight.slnx --nologo -v minimal` | 169 passed, 0 failed, 0 skipped |
-| Test projects | Domain 17, Engine 66, Documents 46, Privacy 12, Configuration 5, TsfBridge 23 |
+| `dotnet test TypeRight.slnx --nologo -v minimal` | 186 passed, 0 failed, 0 skipped |
+| Test projects | Domain 17, Engine 66, Documents 46, Privacy 12, Configuration 5, TsfBridge 40 |
 | Native C++ build | Not run locally — MSVC/Windows SDK are not installed in this environment |
 
 ---
@@ -136,7 +137,7 @@ validation or wiring before being considered done.
 - [ ] Compile and smoke-test the native TSF components with MSVC/Windows SDK on a Windows desktop session.
 - [x] Wire `SUG` responses through the desktop app into the overlay and apply the selected replacement via a validated TSF edit.
 - [x] Load personal SQLite words into the engine at startup and add words from the local settings UI.
-- [ ] Add protocol fuzz/integration tests for truncated, oversized and malformed pipe input.
+- [x] Add protocol fuzz/integration tests for truncated, oversized and malformed pipe input.
 - [ ] Run a full installer install → upgrade → uninstall verification on a clean VM.
 
 ### Later
@@ -175,7 +176,7 @@ validation or wiring before being considered done.
 ### Engineering quality
 
 - Managed solution builds with 0 warnings and 0 errors.
-- Full managed test suite stays green on every commit; current baseline is 169 tests.
+- Full managed test suite stays green on every commit; current baseline is 186 tests.
 - New behaviour requires tests; safety-critical behaviour requires negative tests.
 - `plan.md`, `README.md` and relevant ADRs are kept consistent with the code.
 
@@ -217,7 +218,8 @@ Rules for this table:
 | 2026-11-21 | `15810cc` | Port local Grammarly feature patterns: sensitivity rules, policy gates, revisioned deltas, alert feed and feature matrix | Baseline build/tests | [15810cc](https://github.com/hussainkhilona170-lab/TypeRight/commit/15810cc) |
 | 2026-11-21 | `e09d3e4` | Harden correction pipeline: real engine wiring, embedded vocabulary/ranking/rebasing safety, 6-field pipe protocol with fail-closed policy, tenant-safe tooling/installer, overlay/tray fixes, TsfBridge tests, and establish `plan.md` as the project source of truth | Build 0 warnings/0 errors; 153/153 tests passed | [e09d3e4](https://github.com/hussainkhilona170-lab/TypeRight/commit/e09d3e4490fc9e30d600090e186a3dfecd1ed372) |
 | 2026-11-22 | `952b4af` | Complete the opt-in personal dictionary round-trip: safe SQLite load/store with canonical case-insensitive words, reloadable engine, settings UI “Add word” action, Configuration test project and plan/test-count sync | Build 0 warnings/0 errors; 160/160 tests passed | [952b4af](https://github.com/hussainkhilona170-lab/TypeRight/commit/952b4afbd9b621a978818e8ea43e986a943ba095) |
-| 2026-11-22 | Current | Wire the overlay-to-replacement loop end to end: protocol v3 with token-bearing `SUG`, native `APPLY`/`ACK`, Dispatcher-marshalled indexed overlay selection, gate rechecks, TSF reference lifetime/invalidation fixes and 9 new protocol tests | Build 0 warnings/0 errors; 169/169 tests passed; native C++ smoke test still pending | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
+| 2026-11-22 | `986e64c` | Wire the overlay-to-replacement loop end to end: protocol v3 with token-bearing `SUG`, native `APPLY`/`ACK`, Dispatcher-marshalled indexed overlay selection, gate rechecks, TSF reference lifetime/invalidation fixes and 9 new protocol tests | Build 0 warnings/0 errors; 169/169 tests passed; native C++ smoke test still pending | [986e64c](https://github.com/hussainkhilona170-lab/TypeRight/commit/986e64ce5005a75b21e1bb2aac299f8a77ae9ddf) |
+| 2026-11-22 | Current | Harden protocol parsing with 17 fuzz/edge-case tests for malformed, oversized, wrong-opcode and unknown-status lines; reject unknown ACK statuses, preserve full word-byte budgets for replacements and verify fail-closed UI/pause/cancellation paths | Build 0 warnings/0 errors; 186/186 tests passed | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
 
 > At push time, the exact commit URL for the current row is reported in the push output and final handoff. Future commits must replace the history link with their own exact GitHub commit URL.
 

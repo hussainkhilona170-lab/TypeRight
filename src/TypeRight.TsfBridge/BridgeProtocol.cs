@@ -170,6 +170,8 @@ namespace TypeRight.TsfBridge
             string[] parts = line.Split(FieldSep);
             if (parts.Length != 4 || parts[0] != Ack || !IsValidToken(parts[1]))
                 return false;
+            if (parts[2] != AckOk && parts[2] != AckDeny && parts[2] != AckNone)
+                return false;
 
             token = parts[1];
             status = parts[2];

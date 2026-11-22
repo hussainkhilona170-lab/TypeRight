@@ -129,5 +129,68 @@ namespace TypeRight.TsfBridge.Tests
             Assert.False(BridgeProtocol.IsValidToken(new string('a', 32) + "\t"));
             Assert.True(BridgeProtocol.IsValidToken("0123456789abcdef0123456789abcdef"));
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("PING")]
+        [InlineData("EVAL\tenus\tword\tproc\t\t")]
+        [InlineData("APPLY\tnot-a-token\tproc\t\t")]
+        [InlineData("APPLY\t0123456789abcdef0123456789abcdef\tproc\t\t\textra")]
+        public void TryParseApply_RejectsMalformedAndWrongOpcodeLines(string line)
+        {
+            Assert.False(BridgeProtocol.TryParseApply(line, out _, out _, out _, out _));
+        }
+
+        [Fact]
+        public void TryParseApply_RejectsOversizedLine()
+        {
+            string token = Guid.NewGuid().ToString("N");
+            var line = "APPLY\t" + token + "\t" + new string('p', BridgeProtocol.MaxLineBytes) + "\t\t";
+
+            Assert.False(BridgeProtocol.TryParseApply(line, out _, out _, out _, out _));
+        }
+
+        [Fact]
+        public void FormatApply_RejectsInvalidToken()
+        {
+            Assert.Equal(string.Empty, BridgeProtocol.FormatApply("not-a-token", "proc", "", ""));
+        }
+
+        [Fact]
+        public void TryParseAck_RejectsUnknownStatusAndMalformedLines()
+        {
+            string token = Guid.NewGuid().ToString("N");
+
+            Assert.False(BridgeProtocol.TryParseAck(
+                "ACK\t" + token + "\tUNKNOWN\tworld", out _, out _, out _));
+            Assert.False(BridgeProtocol.TryParseAck(
+                "AUTO\t" + token + "\tOK\tworld", out _, out _, out _));
+            Assert.False(BridgeProtocol.TryParseAck(
+                "ACK\tshort\tOK\tworld", out _, out _, out _));
+        }
+
+        [Fact]
+        public void FormatSuggest_WithToken_StaysWithinLineBudget()
+        {
+            string token = Guid.NewGuid().ToString("N");
+            var huge = new[] { new string('x', 1000), new string('y', 1000), new string('z', 1000) };
+
+            var line = BridgeProtocol.FormatSuggest(token, huge);
+
+            Assert.True(Encoding.UTF8.GetByteCount(line) <= BridgeProtocol.MaxLineBytes);
+            Assert.StartsWith("SUG\t" + token + "\t", line);
+        }
+
+        [Fact]
+        public void FormatAck_UsesWordBudgetForReplacement()
+        {
+            string token = Guid.NewGuid().ToString("N");
+            var line = BridgeProtocol.FormatAck(token, BridgeProtocol.AckOk, new string('é', 300));
+
+            Assert.True(BridgeProtocol.TryParseAck(line, out _, out var status, out var value));
+            Assert.Equal(BridgeProtocol.AckOk, status);
+            Assert.True(Encoding.UTF8.GetByteCount(value) > 256);
+            Assert.True(Encoding.UTF8.GetByteCount(value) <= 512);
+        }
     }
 }
