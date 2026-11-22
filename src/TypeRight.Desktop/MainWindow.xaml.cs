@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using TypeRight.Configuration;
 using TypeRight.Domain.Models;
 using TypeRight.Engine.CorrectionDecision;
+using TypeRight.TsfBridge;
 using MessageBox = System.Windows.MessageBox;
 
 namespace TypeRight.Desktop
@@ -31,6 +32,59 @@ namespace TypeRight.Desktop
 
             // Load settings into UI
             LoadSettings();
+            RefreshHealth();
+        }
+
+        private void RefreshHealth()
+        {
+            try
+            {
+                var health = (System.Windows.Application.Current as App)?.GetLocalDiagnostics();
+                if (health == null)
+                {
+                    HealthText.Text = "Health counters unavailable.";
+                    return;
+                }
+
+                var bridge = health.Bridge;
+                HealthText.Text = string.Join(Environment.NewLine,
+                    $"Pipe: {bridge.PipeName}",
+                    $"Uptime: {FormatUptime(bridge.Uptime)}",
+                    $"Evaluations: {bridge.Evaluations}",
+                    $"Pings: {bridge.Pings}",
+                    $"Apply requests: {bridge.ApplyRequests}",
+                    $"Denied: {bridge.Denied}",
+                    $"Errors: {bridge.Errors}",
+                    $"Engine timeouts: {bridge.EngineTimeouts}",
+                    $"Suggestions offered: {bridge.SuggestionsOffered}",
+                    $"Suggestions resolved: {bridge.SuggestionsResolved}",
+                    $"Active clients: {bridge.ActiveClients}",
+                    $"Pending suggestions: {bridge.PendingSuggestions}",
+                    $"Active features: {health.ActiveFeatureCount}/{health.TotalFeatureCount}",
+                    $"Excluded applications: {health.ExcludedApplicationCount}",
+                    $"Personal words: {health.PersonalWordCount}",
+                    $"Blocked clients: {health.BlockedClientCount}",
+                    $"Blocked domains: {health.BlockedDomainCount}",
+                    $"Policy rules: {health.IntegrationRuleCount}",
+                    $"Sensitivity rules: {health.SensitivityRuleCount}");
+            }
+            catch (Exception)
+            {
+                // Never surface exception text or local paths in diagnostics.
+                HealthText.Text = "Health counters unavailable.";
+            }
+        }
+
+        private static string FormatUptime(TimeSpan uptime)
+        {
+            return uptime.TotalDays >= 1
+                ? uptime.ToString(@"d\.hh\:mm\:ss")
+                : uptime.ToString(@"hh\:mm\:ss");
+        }
+
+        private void RefreshHealthButton_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshHealth();
         }
 
         private void LoadSettings()

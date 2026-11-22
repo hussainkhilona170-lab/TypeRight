@@ -29,6 +29,16 @@ namespace TypeRight.TsfBridge
         private static readonly TimeSpan DisposeWaitTimeout = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan DefaultSelectionTimeout = TimeSpan.FromSeconds(5);
 
+        private readonly DateTimeOffset _startedAt = DateTimeOffset.UtcNow;
+        private long _evaluations;
+        private long _pings;
+        private long _applyRequests;
+        private long _denied;
+        private long _errors;
+        private long _engineTimeouts;
+        private long _suggestionsOffered;
+        private long _suggestionsResolved;
+
         /// <summary>Raised when suggestions are ready for a UI to display.</summary>
         public event EventHandler<SuggestionOfferedEventArgs> SuggestionOffered;
 
@@ -135,6 +145,30 @@ namespace TypeRight.TsfBridge
             if (_loop != null) return;
             _cts = new CancellationTokenSource();
             _loop = Task.Run(() => AcceptLoopAsync(_cts.Token));
+        }
+
+        /// <summary>
+        /// Returns a content-free health snapshot. Only counts, a fixed pipe
+        /// name and a duration are exposed; no request or policy text is included.
+        /// </summary>
+        public BridgeHealthSnapshot GetHealthSnapshot()
+        {
+            int activeClients;
+            lock (_clientTasksLock)
+                activeClients = _clientTasks.Count;
+
+            return new BridgeHealthSnapshot(
+                DateTimeOffset.UtcNow - _startedAt,
+                Interlocked.Read(ref _evaluations),
+                Interlocked.Read(ref _pings),
+                Interlocked.Read(ref _applyRequests),
+                Interlocked.Read(ref _denied),
+                Interlocked.Read(ref _errors),
+                Interlocked.Read(ref _engineTimeouts),
+                Interlocked.Read(ref _suggestionsOffered),
+                Interlocked.Read(ref _suggestionsResolved),
+                activeClients,
+                _pendingSuggestions.Count);
         }
 
         private async Task AcceptLoopAsync(CancellationToken token)
@@ -260,6 +294,7 @@ namespace TypeRight.TsfBridge
                                 if (engineCompleted != engineTask)
                                 {
                                     ObserveFault(engineTask);
+                                    Interlocked.Increment(ref _engineTimeouts);
                                     response = BridgeProtocol.FormatError("engine_timeout");
                                 }
                                 else
@@ -307,14 +342,24 @@ namespace TypeRight.TsfBridge
         {
             if (!BridgeProtocol.TryParseRequest(line, out var opcode, out var language, out var word,
                                                 out var process, out var domain, out var element))
+            {
+                Interlocked.Increment(ref _errors);
                 return BridgeProtocol.FormatError("bad_request");
+            }
 
             if (opcode == BridgeProtocol.Ping)
+            {
+                Interlocked.Increment(ref _pings);
                 return BridgeProtocol.FormatPong();
+            }
 
+            Interlocked.Increment(ref _evaluations);
             string denyReason = IsCorrectionAllowed(process, domain, element);
             if (denyReason != null)
+            {
+                Interlocked.Increment(ref _denied);
                 return BridgeProtocol.FormatDeny();
+            }
 
             LanguageVariant variant = ParseLanguage(language);
 
@@ -352,6 +397,7 @@ namespace TypeRight.TsfBridge
             }
             catch (Exception)
             {
+                Interlocked.Increment(ref _errors);
                 return BridgeProtocol.FormatError("engine_fault");
             }
         }
@@ -362,7 +408,12 @@ namespace TypeRight.TsfBridge
         public async Task<string> ProcessApplyAsync(string line, CancellationToken cancellationToken = default)
         {
             if (!BridgeProtocol.TryParseApply(line, out var token, out _, out _, out _))
+            {
+                Interlocked.Increment(ref _errors);
                 return BridgeProtocol.FormatError("bad_request");
+            }
+
+            Interlocked.Increment(ref _applyRequests);
             return await HandleApplyAsync(token, cancellationToken).ConfigureAwait(false);
         }
 
@@ -432,6 +483,7 @@ namespace TypeRight.TsfBridge
                 return BridgeProtocol.FormatNone();
             }
 
+            Interlocked.Increment(ref _suggestionsOffered);
             return BridgeProtocol.FormatSuggest(token, values);
         }
 
@@ -484,6 +536,7 @@ namespace TypeRight.TsfBridge
                 return;
             if (!pending.Completion.TrySetResult(new SuggestionSelection(status, value)))
                 return;
+            Interlocked.Increment(ref _suggestionsResolved);
 
             try
             {

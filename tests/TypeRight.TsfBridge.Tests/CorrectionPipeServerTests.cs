@@ -369,5 +369,72 @@ namespace TypeRight.TsfBridge.Tests
                 Assert.Equal(0, maker.CallCount);
             }
         }
+
+        [Fact]
+        public void Health_StartsEmptyAndCountsRequestsWithoutText()
+        {
+            var maker = new StubDecisionMaker(Decision.Preserve());
+            using var server = new CorrectionPipeServer(maker, new ConfigurationSettings(), ContextPolicy());
+
+            var initial = server.GetHealthSnapshot();
+            Assert.Equal(BridgeProtocol.PipeName, initial.PipeName);
+            Assert.True(initial.Uptime >= TimeSpan.Zero);
+            Assert.Equal(0, initial.Evaluations);
+            Assert.Equal(0, initial.Pings);
+            Assert.Equal(0, initial.ApplyRequests);
+            Assert.Equal(0, initial.Denied);
+            Assert.Equal(0, initial.Errors);
+            Assert.Equal(0, initial.EngineTimeouts);
+            Assert.Equal(0, initial.SuggestionsOffered);
+            Assert.Equal(0, initial.SuggestionsResolved);
+            Assert.Equal(0, initial.ActiveClients);
+            Assert.Equal(0, initial.PendingSuggestions);
+
+            Assert.Equal(BridgeProtocol.OkPong, server.ProcessRequest(BridgeProtocol.Ping));
+            Assert.Equal(BridgeProtocol.OkNone, server.ProcessRequest(Eval()));
+            Assert.Equal("ERR\tbad_request", server.ProcessRequest("EVAL\tbad"));
+            Assert.Equal(BridgeProtocol.Denied, server.ProcessRequest(Eval("blocked.exe")));
+
+            var health = server.GetHealthSnapshot();
+            Assert.Equal(BridgeProtocol.PipeName, health.PipeName);
+            Assert.Equal(1, health.Pings);
+            Assert.Equal(2, health.Evaluations);
+            Assert.Equal(0, health.ApplyRequests);
+            Assert.Equal(1, health.Denied);
+            Assert.Equal(1, health.Errors);
+            Assert.Equal(0, health.EngineTimeouts);
+            Assert.Equal(0, health.SuggestionsOffered);
+            Assert.Equal(0, health.SuggestionsResolved);
+            Assert.Equal(0, health.ActiveClients);
+            Assert.Equal(0, health.PendingSuggestions);
+        }
+
+        [Fact]
+        public async Task Health_SuggestionLifecycleUpdatesCounters()
+        {
+            var maker = new StubDecisionMaker(Decision.Suggest(new[] { "world" }, 0.9f));
+            using var server = new CorrectionPipeServer(maker, new ConfigurationSettings());
+
+            var response = server.ProcessRequest(Eval());
+            string token = response.Split('\t')[1];
+
+            var offered = server.GetHealthSnapshot();
+            Assert.Equal(1, offered.Evaluations);
+            Assert.Equal(1, offered.SuggestionsOffered);
+            Assert.Equal(1, offered.PendingSuggestions);
+
+            var apply = server.ProcessApplyAsync(
+                BridgeProtocol.FormatApply(token, "notepad.exe", string.Empty, string.Empty));
+            Assert.True(server.TryResolveSuggestion(token, 0));
+            var ack = await apply;
+
+            Assert.True(BridgeProtocol.TryParseAck(ack, out _, out var status, out _));
+            Assert.Equal(BridgeProtocol.AckOk, status);
+
+            var resolved = server.GetHealthSnapshot();
+            Assert.Equal(1, resolved.ApplyRequests);
+            Assert.Equal(1, resolved.SuggestionsResolved);
+            Assert.Equal(0, resolved.PendingSuggestions);
+        }
     }
 }

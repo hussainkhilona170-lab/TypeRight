@@ -140,6 +140,45 @@ namespace TypeRight.Configuration
         }
 
         /// <summary>
+        /// Returns the number of accepted personal words without reading any word
+        /// text into managed memory. Personal learning is opt-in; a disabled
+        /// setting, missing database or corrupt store returns zero.
+        /// </summary>
+        public int GetPersonalWordCount()
+        {
+            if (!PersonalLearningEnabled)
+                return 0;
+
+            try
+            {
+                var dbPath = ResolveVocabularyPath();
+                if (!File.Exists(dbPath))
+                    return 0;
+
+                var builder = new SqliteConnectionStringBuilder
+                {
+                    DataSource = dbPath,
+                    Mode = SqliteOpenMode.ReadOnly
+                };
+                using var connection = new SqliteConnection(builder.ConnectionString);
+                connection.Open();
+
+                using var command = connection.CreateCommand();
+                command.CommandText =
+                    "SELECT COUNT(*) FROM Vocabulary WHERE word IS NOT NULL AND TRIM(word) <> ''";
+                object result = command.ExecuteScalar();
+                if (result is long count)
+                    return (int)Math.Min(count, int.MaxValue);
+                return 0;
+            }
+            catch (Exception)
+            {
+                // Never surface file content, schema text or exception details.
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Adds a single accepted word to the local vocabulary. Rejected when
         /// personal learning is off, the value is not a single bounded word, or
         /// storage is unavailable. Repeated additions only increase frequency.

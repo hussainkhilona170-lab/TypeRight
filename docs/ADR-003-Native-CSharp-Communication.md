@@ -52,6 +52,10 @@ again, so stale requests are discarded.
 - Policy and feature gates are enforced in the managed bridge before any
   decision is returned and again before a selection is acknowledged; `DENY`
   means no correction and no suggestion.
+- The bridge exposes only content-free counters (evaluations, pings, apply
+  requests, denials, errors, timeouts, suggestion lifecycle and active
+  clients) for the local health view. No wire value, exception text or context
+  field is copied into diagnostics.
 
 Protobuf was considered as a versioned schema but is not used: the line
 protocol is simpler, bounded and sufficient for one completed word at a time.

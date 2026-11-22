@@ -39,4 +39,4 @@ the managed solution builds without them.
 ## Tests
 
 `dotnet test TypeRight.slnx` runs the Domain (17), Engine (66), Documents (46),
-Privacy (12), Configuration (5) and TsfBridge (40) test projects — 186 tests total.
+Privacy (12), Configuration (7) and TsfBridge (44) test projects — 192 tests total.

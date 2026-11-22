@@ -90,6 +90,31 @@ public sealed class ConfigurationSettingsTests : IDisposable
         Assert.True(File.Exists(settings.VocabularyPath));
     }
 
+    [Fact]
+    public void GetPersonalWordCount_IsOptInAndCountsWithoutTextAccess()
+    {
+        var disabled = CreateSettings(enablePersonalLearning: false);
+        Assert.Equal(0, disabled.GetPersonalWordCount());
+        Assert.False(File.Exists(disabled.VocabularyPath));
+
+        var enabled = CreateSettings();
+        Assert.Equal(0, enabled.GetPersonalWordCount());
+
+        Assert.True(enabled.AddPersonalWord("first", LanguageVariant.EnUs));
+        Assert.True(enabled.AddPersonalWord("SECOND", LanguageVariant.EnGb));
+        Assert.True(enabled.AddPersonalWord("first", LanguageVariant.EnUs));
+        Assert.Equal(2, enabled.GetPersonalWordCount());
+    }
+
+    [Fact]
+    public void GetPersonalWordCount_ReturnsZeroForCorruptDatabase()
+    {
+        var corrupt = CreateSettings();
+        File.WriteAllText(corrupt.VocabularyPath, "this is not a sqlite database");
+
+        Assert.Equal(0, corrupt.GetPersonalWordCount());
+    }
+
     private ConfigurationSettings CreateSettings(bool enablePersonalLearning = true)
         => new()
         {

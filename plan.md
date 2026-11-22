@@ -86,6 +86,7 @@ unless they can be implemented locally and privately.
 - Blocked clients, blocked domains, confidential mode, DLP and integration mode.
 - 584-rule integration/sensitivity configuration with 81 sensitivity rules compiled locally.
 - `PolicyEvaluator.RequiresContext` forces fail-closed behaviour for legacy context-free requests.
+- Policy diagnostics expose only counts of blocked clients/domains and loaded rules; no policy value or rule text is surfaced.
 - Excluded-application, confidence-threshold and suggestions-visible settings enforced in the bridge.
 
 ### Desktop, tray and overlay
@@ -95,6 +96,7 @@ unless they can be implemented locally and privately.
 - Settings window for language variant, confidence threshold, personal learning, exclusions and suggestion visibility, including an “Add word” action for the local dictionary.
 - Non-activating, non-focusable, single-instance suggestion overlay with work-area clamping, indexed selection, Dispatcher marshalling, auto-dismiss and no taskbar button.
 - Overlay selection resolves through the bridge to a token-validated TSF replacement; stale, paused or unoffered values are rejected before any edit.
+- Read-only local health card in settings with a manual refresh; displays only counts, uptime and the fixed pipe identifier.
 - Generic startup error messages; exception text and paths are never shown to the user.
 
 ### Configuration, persistence and tooling
@@ -102,6 +104,7 @@ unless they can be implemented locally and privately.
 - JSON settings load/save with safe defaults for malformed or missing files.
 - Optional SQLite personal-vocabulary schema, created only when personal learning is enabled.
 - Case-insensitive personal-word round-trip: canonical storage, frequency updates, corrupt-file fallback and startup load into the engine.
+- Count-only personal-vocabulary diagnostics using `SELECT COUNT(*)`; word text is never read back for the health view.
 - WiX installer scripts, license page, uninstall registry cleanup and path-independent PowerShell tooling.
 - Toolchain diagnostic script and local engine host.
 - Removed the flagged/unreadable `tools/screenshot.ps1`; use built-in Windows screenshot tools instead.
@@ -111,8 +114,8 @@ unless they can be implemented locally and privately.
 | Check | Result |
 |---|---|
 | `dotnet build TypeRight.slnx --nologo -v minimal` | 0 warnings, 0 errors |
-| `dotnet test TypeRight.slnx --nologo -v minimal` | 186 passed, 0 failed, 0 skipped |
-| Test projects | Domain 17, Engine 66, Documents 46, Privacy 12, Configuration 5, TsfBridge 40 |
+| `dotnet test TypeRight.slnx --nologo -v minimal` | 192 passed, 0 failed, 0 skipped |
+| Test projects | Domain 17, Engine 66, Documents 46, Privacy 12, Configuration 7, TsfBridge 44 |
 | Native C++ build | Not run locally — MSVC/Windows SDK are not installed in this environment |
 
 ---
@@ -126,7 +129,7 @@ validation or wiring before being considered done.
 2. **Overlay polish.** Mouse selection, auto-dismiss, pause dismissal and single-instance reuse are wired; keyboard navigation, host-deactivation dismissal and accessibility polish are still open.
 3. **Installer/release validation.** Scripts parse and the WiX document is well-formed, but a clean machine install/upgrade/uninstall run has not yet been performed. Signing and auto-update are not implemented.
 4. **Local feature matrix expansion.** Cloud-dependent agents are correctly gated off; additional offline-correctness and local-style checks need careful privacy review before activation.
-5. **Native diagnostics without content.** Event-only diagnostics exist; a local, content-free health view would improve supportability without introducing telemetry.
+5. **Native diagnostics.** The managed health view is implemented with counts only; native C++ diagnostics remain event-only until an MSVC/Windows SDK smoke test is possible, and must stay content-free.
 
 ---
 
@@ -145,7 +148,7 @@ validation or wiring before being considered done.
 - [ ] Expand the embedded vocabulary and frequency data with curated, versioned, offline resources.
 - [ ] Add local grammar/style rules behind `LocalFeatureGates`, each with an explicit privacy review.
 - [ ] Add keyboard navigation and accessibility polish to the suggestion overlay.
-- [ ] Add a local diagnostics panel showing policy/rule counts and bridge health — no text, no network.
+- [x] Add a local diagnostics panel showing policy/rule counts and bridge health — no text, no network.
 - [ ] Add release signing, deterministic versioning and a documented update path.
 - [ ] Publish architecture/API documentation and ADR statuses for implemented features.
 
@@ -176,7 +179,7 @@ validation or wiring before being considered done.
 ### Engineering quality
 
 - Managed solution builds with 0 warnings and 0 errors.
-- Full managed test suite stays green on every commit; current baseline is 186 tests.
+- Full managed test suite stays green on every commit; current baseline is 192 tests.
 - New behaviour requires tests; safety-critical behaviour requires negative tests.
 - `plan.md`, `README.md` and relevant ADRs are kept consistent with the code.
 
@@ -219,7 +222,8 @@ Rules for this table:
 | 2026-11-21 | `e09d3e4` | Harden correction pipeline: real engine wiring, embedded vocabulary/ranking/rebasing safety, 6-field pipe protocol with fail-closed policy, tenant-safe tooling/installer, overlay/tray fixes, TsfBridge tests, and establish `plan.md` as the project source of truth | Build 0 warnings/0 errors; 153/153 tests passed | [e09d3e4](https://github.com/hussainkhilona170-lab/TypeRight/commit/e09d3e4490fc9e30d600090e186a3dfecd1ed372) |
 | 2026-11-22 | `952b4af` | Complete the opt-in personal dictionary round-trip: safe SQLite load/store with canonical case-insensitive words, reloadable engine, settings UI “Add word” action, Configuration test project and plan/test-count sync | Build 0 warnings/0 errors; 160/160 tests passed | [952b4af](https://github.com/hussainkhilona170-lab/TypeRight/commit/952b4afbd9b621a978818e8ea43e986a943ba095) |
 | 2026-11-22 | `986e64c` | Wire the overlay-to-replacement loop end to end: protocol v3 with token-bearing `SUG`, native `APPLY`/`ACK`, Dispatcher-marshalled indexed overlay selection, gate rechecks, TSF reference lifetime/invalidation fixes and 9 new protocol tests | Build 0 warnings/0 errors; 169/169 tests passed; native C++ smoke test still pending | [986e64c](https://github.com/hussainkhilona170-lab/TypeRight/commit/986e64ce5005a75b21e1bb2aac299f8a77ae9ddf) |
-| 2026-11-22 | Current | Harden protocol parsing with 17 fuzz/edge-case tests for malformed, oversized, wrong-opcode and unknown-status lines; reject unknown ACK statuses, preserve full word-byte budgets for replacements and verify fail-closed UI/pause/cancellation paths | Build 0 warnings/0 errors; 186/186 tests passed | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
+| 2026-11-22 | `c87c064` | Harden protocol parsing with 17 fuzz/edge-case tests for malformed, oversized, wrong-opcode and unknown-status lines; reject unknown ACK statuses, preserve full word-byte budgets for replacements and verify fail-closed UI/pause/cancellation paths | Build 0 warnings/0 errors; 186/186 tests passed | [c87c064](https://github.com/hussainkhilona170-lab/TypeRight/commit/c87c064169c59d587c034d2d69414644f5c04016) |
+| 2026-11-22 | Current | Add content-free local health diagnostics: bridge counters, count-only policy/config/feature snapshot, count-only personal-vocabulary query, read-only settings card and ADR-008 | Build 0 warnings/0 errors; 192/192 tests passed | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
 
 > At push time, the exact commit URL for the current row is reported in the push output and final handoff. Future commits must replace the history link with their own exact GitHub commit URL.
 

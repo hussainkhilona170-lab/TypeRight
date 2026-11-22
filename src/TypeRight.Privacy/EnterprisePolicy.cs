@@ -114,6 +114,12 @@ namespace TypeRight.Privacy
             _policy.DlpEnabled ||
             !string.Equals(_policy.IntegrationMode, "full", StringComparison.OrdinalIgnoreCase);
 
+        // Count-only accessors for local diagnostics. They never expose policy values.
+        public int BlockedClientCount => _policy.BlockedClientSet.Count;
+        public int BlockedDomainCount => _policy.BlockedDomainSet.Count;
+        public int RuleCount => _rules?.RuleCount ?? 0;
+        public int SensitivityRuleCount => _rules?.SensitivityRuleCount ?? 0;
+
         public PolicyDecision Evaluate(string processName, string domain, string focusedElement)
         {
             var reasons = new List<string>();

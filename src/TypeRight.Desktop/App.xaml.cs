@@ -31,6 +31,8 @@ namespace TypeRight.Desktop
         private ICorrectionDecisionMaker _decisionMaker;
         private CorrectionPipeServer _pipeServer;
         private MainWindow _mainWindow;
+        private EnterprisePolicy _policy;
+        private PolicyEvaluator _policyEvaluator;
         private bool _serviceRunning;
 
         private OverlayWindow _overlay;
@@ -70,6 +72,18 @@ namespace TypeRight.Desktop
         /// </summary>
         public bool ServiceRunning => _serviceRunning;
 
+        /// <summary>
+        /// Captures a local-only, content-free health snapshot for the settings UI.
+        /// </summary>
+        public LocalDiagnosticsSnapshot GetLocalDiagnostics()
+        {
+            return LocalDiagnosticsSnapshot.Capture(
+                _pipeServer?.GetHealthSnapshot(),
+                _configuration,
+                Features,
+                _policyEvaluator);
+        }
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             try
@@ -96,8 +110,9 @@ namespace TypeRight.Desktop
                 Suggestions = new SuggestionFeed();
 
                 _serviceRunning = true;
-                var policy = new PolicyEvaluator(EnterprisePolicy.Load(), IntegrationRuleset.LoadDefault());
-                _pipeServer = new CorrectionPipeServer(_decisionMaker, _configuration, policy, Features,
+                _policy = EnterprisePolicy.Load();
+                _policyEvaluator = new PolicyEvaluator(_policy, IntegrationRuleset.LoadDefault());
+                _pipeServer = new CorrectionPipeServer(_decisionMaker, _configuration, _policyEvaluator, Features,
                     () => _serviceRunning);
                 _pipeServer.SuggestionOffered += OnSuggestionOffered;
                 _pipeServer.SuggestionResolved += OnSuggestionResolved;
