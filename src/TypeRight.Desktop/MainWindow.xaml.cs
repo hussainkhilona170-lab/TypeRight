@@ -44,6 +44,7 @@ namespace TypeRight.Desktop
             };
 
             PersonalLearningCheck.IsChecked = _configuration.PersonalLearningEnabled;
+            UpdatePersonalWordControls(_configuration.PersonalLearningEnabled);
             ShowSuggestionsCheck.IsChecked = _configuration.ShowSuggestions;
             ConfidenceSlider.Value = _configuration.ConfidenceThreshold;
             ConfidenceValue.Text = _configuration.ConfidenceThreshold.ToString("0.00");
@@ -53,6 +54,40 @@ namespace TypeRight.Desktop
                 : string.Empty;
 
             StartWithWindowsCheck.IsChecked = IsStartupRegistered();
+        }
+
+        private void UpdatePersonalWordControls(bool enabled)
+        {
+            if (PersonalWordBox == null || AddPersonalWordButton == null) return;
+            PersonalWordBox.IsEnabled = enabled;
+            AddPersonalWordButton.IsEnabled = enabled;
+        }
+
+        private void PersonalLearningCheck_Changed(object sender, RoutedEventArgs e)
+        {
+            UpdatePersonalWordControls(PersonalLearningCheck.IsChecked ?? false);
+        }
+
+        private void AddPersonalWordButton_Click(object sender, RoutedEventArgs e)
+        {
+            var word = PersonalWordBox?.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                MessageBox.Show("Enter a single word to add.", "TypeRight 2.0",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (!App.AddPersonalWord(word))
+            {
+                MessageBox.Show("Personal learning must be enabled and local storage must be available.",
+                    "TypeRight 2.0", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            PersonalWordBox.Clear();
+            MessageBox.Show("Word added to your local dictionary.", "TypeRight 2.0",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void SaveSettings()
@@ -76,6 +111,9 @@ namespace TypeRight.Desktop
                 .ToArray();
 
             _configuration.Save();
+
+            // Apply personal-learning changes immediately without restarting.
+            App.ReloadableEngine?.Reload();
 
             // Startup registration
             SetStartupRegistration(StartWithWindowsCheck.IsChecked ?? false);

@@ -40,6 +40,12 @@ namespace TypeRight.Desktop
         public static ICorrectionDecisionMaker Engine { get; private set; }
 
         /// <summary>
+        /// Reloadable engine used by the bridge. Stable instance, refreshed when
+        /// the local personal dictionary changes.
+        /// </summary>
+        public static ReloadableDecisionMaker ReloadableEngine { get; private set; }
+
+        /// <summary>
         /// Local feature gates. Cloud-dependent features are never enabled.
         /// </summary>
         public static LocalFeatureGates Features { get; private set; }
@@ -69,8 +75,10 @@ namespace TypeRight.Desktop
                 if (_configuration.PersonalLearningEnabled)
                     _configuration.InitializeVocabulary();
 
-                // Initialize correction engine
-                _decisionMaker = EngineComposition.CreateDecisionMaker();
+                // Initialize correction engine. The reloadable wrapper lets the
+                // bridge keep a stable instance while personal words change.
+                ReloadableEngine = new ReloadableDecisionMaker(() => _configuration.LoadPersonalWords());
+                _decisionMaker = ReloadableEngine;
                 Engine = _decisionMaker;
 
                 // Start the local named-pipe bridge so the native TSF text service
@@ -223,6 +231,29 @@ namespace TypeRight.Desktop
 
             _mainWindow.Activate();
             _mainWindow.Focus();
+        }
+
+        /// <summary>
+        /// Adds a word to the opt-in local dictionary and refreshes the engine.
+        /// Returns false when personal learning is disabled or storage rejects it.
+        /// </summary>
+        public static bool AddPersonalWord(string word)
+        {
+            try
+            {
+                if (Settings == null || !Settings.PersonalLearningEnabled)
+                    return false;
+                if (!Settings.AddPersonalWord(word, Settings.LanguageVariant))
+                    return false;
+
+                ReloadableEngine?.Reload();
+                return true;
+            }
+            catch (Exception)
+            {
+                // Never expose paths, SQL errors or word content.
+                return false;
+            }
         }
 
         /// <summary>

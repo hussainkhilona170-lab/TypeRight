@@ -82,7 +82,15 @@
 
                         <!-- Personal Learning -->
                         <CheckBox x:Name="PersonalLearningCheck" Content="Enable personal learning (opt-in, stored locally only)"
-                                  FontSize="13" Foreground="#FF34495E" Margin="0,4,0,10"/>
+                                  FontSize="13" Foreground="#FF34495E" Margin="0,4,0,4"
+                                  Checked="PersonalLearningCheck_Changed" Unchecked="PersonalLearningCheck_Changed"/>
+                        <StackPanel Orientation="Horizontal" Margin="22,0,0,10">
+                            <TextBox x:Name="PersonalWordBox" Width="260" FontSize="13" Padding="6"
+                                     ToolTip="Add a single word to accept locally"/>
+                            <Button x:Name="AddPersonalWordButton" Content="Add word"
+                                    Style="{StaticResource PrimaryButton}" Margin="8,0,0,0"
+                                    Click="AddPersonalWordButton_Click"/>
+                        </StackPanel>
 
                         <!-- Show Suggestions -->
                         <CheckBox x:Name="ShowSuggestionsCheck" Content="Show suggestion overlay" IsChecked="True"

@@ -14,6 +14,7 @@
     <Project Path="src/TypeRight.WPFOverlay/TypeRight.WPFOverlay.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/TypeRight.Configuration.Tests/TypeRight.Configuration.Tests.csproj" />
     <Project Path="tests/TypeRight.Documents.Tests/TypeRight.Documents.Tests.csproj" />
     <Project Path="tests/TypeRight.Domain.Tests/TypeRight.Domain.Tests.csproj" />
     <Project Path="tests/TypeRight.Engine.Tests/TypeRight.Engine.Tests.csproj" />

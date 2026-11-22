@@ -1,6 +1,6 @@
 # TypeRight Plan
 
-**Last updated:** 2026-11-21  
+**Last updated:** 2026-11-22  
 **Repository:** https://github.com/hussainkhilona170-lab/TypeRight  
 **Status:** Active development on `master`
 
@@ -66,6 +66,7 @@ unless they can be implemented locally and privately.
 - Regional British/American spelling handling with per-pair preservation/correction policy.
 - `Auto`, `Suggest` and `Preserve` decisions with reason categories and rationale.
 - Personal-word support through `EngineComposition.CreateDecisionMaker(personalWords)` and `CreateCandidateGenerator(personalWords)`.
+- `ReloadableDecisionMaker` refreshes the live engine pipeline from the local dictionary without restarting the app or replacing the bridge's stable reference.
 
 ### Document and suggestion safety
 
@@ -89,7 +90,7 @@ unless they can be implemented locally and privately.
 
 - WPF tray application with status, active-feature count, Open, Settings, Pause/Resume and Exit actions.
 - Embedded/copied tray icon with safe fallback.
-- Settings window for language variant, confidence threshold, personal learning, exclusions and suggestion visibility.
+- Settings window for language variant, confidence threshold, personal learning, exclusions and suggestion visibility, including an “Add word” action for the local dictionary.
 - Non-activating, non-focusable suggestion overlay with work-area clamping and a `SuggestionSelected` event.
 - Generic startup error messages; exception text and paths are never shown to the user.
 
@@ -97,6 +98,7 @@ unless they can be implemented locally and privately.
 
 - JSON settings load/save with safe defaults for malformed or missing files.
 - Optional SQLite personal-vocabulary schema, created only when personal learning is enabled.
+- Case-insensitive personal-word round-trip: canonical storage, frequency updates, corrupt-file fallback and startup load into the engine.
 - WiX installer scripts, license page, uninstall registry cleanup and path-independent PowerShell tooling.
 - Toolchain diagnostic script and local engine host.
 - Removed the flagged/unreadable `tools/screenshot.ps1`; use built-in Windows screenshot tools instead.
@@ -106,8 +108,8 @@ unless they can be implemented locally and privately.
 | Check | Result |
 |---|---|
 | `dotnet build TypeRight.slnx --nologo -v minimal` | 0 warnings, 0 errors |
-| `dotnet test TypeRight.slnx --nologo -v minimal` | 153 passed, 0 failed, 0 skipped |
-| Test projects | Domain 17, Engine 64, Documents 46, Privacy 12, TsfBridge 14 |
+| `dotnet test TypeRight.slnx --nologo -v minimal` | 160 passed, 0 failed, 0 skipped |
+| Test projects | Domain 17, Engine 66, Documents 46, Privacy 12, Configuration 5, TsfBridge 14 |
 | Native C++ build | Not run locally — MSVC/Windows SDK are not installed in this environment |
 
 ---
@@ -119,10 +121,9 @@ validation or wiring before being considered done.
 
 1. **Native TSF toolchain validation.** The protocol and native client code are written, but the C++ projects cannot be compiled locally without MSVC and the Windows SDK. A real-app smoke test is still required.
 2. **Overlay-to-replacement loop.** `OverlayWindow` can display suggestions, clamp its position, stay non-activating and raise `SuggestionSelected`; production wiring from a `SUG` bridge response to overlay display and TSF replacement is still pending.
-3. **Personal dictionary round-trip.** The SQLite schema and opt-on toggle exist, and the engine accepts personal words, but stored words are not yet loaded back into `EngineComposition` at startup; “Add to dictionary” feedback is not yet persisted.
-4. **Installer/release validation.** Scripts parse and the WiX document is well-formed, but a clean machine install/upgrade/uninstall run has not yet been performed. Signing and auto-update are not implemented.
-5. **Local feature matrix expansion.** Cloud-dependent agents are correctly gated off; additional offline-correctness and local-style checks need careful privacy review before activation.
-6. **Native diagnostics without content.** Event-only diagnostics exist; a local, content-free health view would improve supportability without introducing telemetry.
+3. **Installer/release validation.** Scripts parse and the WiX document is well-formed, but a clean machine install/upgrade/uninstall run has not yet been performed. Signing and auto-update are not implemented.
+4. **Local feature matrix expansion.** Cloud-dependent agents are correctly gated off; additional offline-correctness and local-style checks need careful privacy review before activation.
+5. **Native diagnostics without content.** Event-only diagnostics exist; a local, content-free health view would improve supportability without introducing telemetry.
 
 ---
 
@@ -132,7 +133,7 @@ validation or wiring before being considered done.
 
 - [ ] Compile and smoke-test the native TSF components with MSVC/Windows SDK on a Windows desktop session.
 - [ ] Wire `SUG` responses through the desktop app into the overlay and apply the selected replacement via a validated TSF edit.
-- [ ] Load personal SQLite words into the engine at startup and persist “Add to dictionary” feedback locally.
+- [x] Load personal SQLite words into the engine at startup and add words from the local settings UI.
 - [ ] Add protocol fuzz/integration tests for truncated, oversized and malformed pipe input.
 - [ ] Run a full installer install → upgrade → uninstall verification on a clean VM.
 
@@ -172,7 +173,7 @@ validation or wiring before being considered done.
 ### Engineering quality
 
 - Managed solution builds with 0 warnings and 0 errors.
-- Full managed test suite stays green on every commit; current baseline is 153 tests.
+- Full managed test suite stays green on every commit; current baseline is 160 tests.
 - New behaviour requires tests; safety-critical behaviour requires negative tests.
 - `plan.md`, `README.md` and relevant ADRs are kept consistent with the code.
 
@@ -190,6 +191,7 @@ validation or wiring before being considered done.
 |---|---|---|
 | `TypeRight.Domain` | Request/decision models, suggestion taxonomy | Depend on UI, IO or Windows APIs |
 | `TypeRight.Engine` | Tokenisation, candidates, ranking, confidence, decisions | Read user files, log text, call the network |
+| `TypeRight.Configuration` | Local settings and opt-in personal vocabulary storage | Log settings values or expose user text |
 | `TypeRight.Documents` | Deltas, revisions, rebasing, provenance | Mutate live application documents |
 | `TypeRight.Suggestions` | Alert feed, feedback, feature gates | Persist user text or upload feedback |
 | `TypeRight.Privacy` | Enterprise policy and integration rules | Allow correction on unknown context |
@@ -211,7 +213,8 @@ Rules for this table:
 | Date | Commit | Summary | Verification | Link |
 |---|---|---|---|---|
 | 2026-11-21 | `15810cc` | Port local Grammarly feature patterns: sensitivity rules, policy gates, revisioned deltas, alert feed and feature matrix | Baseline build/tests | [15810cc](https://github.com/hussainkhilona170-lab/TypeRight/commit/15810cc) |
-| 2026-11-21 | Current | Harden correction pipeline: real engine wiring, embedded vocabulary/ranking/rebasing safety, 6-field pipe protocol with fail-closed policy, tenant-safe tooling/installer, overlay/tray fixes, TsfBridge tests, and establish `plan.md` as the project source of truth | Build 0 warnings/0 errors; 153/153 tests passed | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
+| 2026-11-21 | `e09d3e4` | Harden correction pipeline: real engine wiring, embedded vocabulary/ranking/rebasing safety, 6-field pipe protocol with fail-closed policy, tenant-safe tooling/installer, overlay/tray fixes, TsfBridge tests, and establish `plan.md` as the project source of truth | Build 0 warnings/0 errors; 153/153 tests passed | [e09d3e4](https://github.com/hussainkhilona170-lab/TypeRight/commit/e09d3e4490fc9e30d600090e186a3dfecd1ed372) |
+| 2026-11-22 | Current | Complete the opt-in personal dictionary round-trip: safe SQLite load/store with canonical case-insensitive words, reloadable engine, settings UI “Add word” action, Configuration test project and plan/test-count sync | Build 0 warnings/0 errors; 160/160 tests passed | [Repository history](https://github.com/hussainkhilona170-lab/TypeRight/commits/master) |
 
 > At push time, the exact commit URL for the current row is reported in the push output and final handoff. Future commits must replace the history link with their own exact GitHub commit URL.
 
