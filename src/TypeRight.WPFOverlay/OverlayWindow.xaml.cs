@@ -3,6 +3,7 @@ namespace TypeRight.WPFOverlay
     using System;
     using System.Collections.Generic;
     using System.Windows;
+    using System.Windows.Automation;
     using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Media;
@@ -12,8 +13,7 @@ namespace TypeRight.WPFOverlay
     /// </summary>
     public partial class OverlayWindow : Window
     {
-        private bool _suggestionsInitialized;
-        private int _suggestionCount;
+        private readonly List<string> _suggestions = new List<string>();
 
         /// <summary>
         /// Raised with the suggestion text when the user picks a suggestion.
@@ -30,13 +30,19 @@ namespace TypeRight.WPFOverlay
         public event EventHandler<SuggestionSelectionEventArgs> SuggestionSelectedIndexed;
 
         /// <summary>
+        /// Raised when the user requests dismissal with Escape. Correlation state
+        /// stays with the caller, so the overlay never resolves the token itself.
+        /// </summary>
+        public event EventHandler SuggestionDismissRequested;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OverlayWindow"/> class.
         /// </summary>
         public OverlayWindow()
         {
             InitializeComponent();
 
-            // Set up window properties for non-activating overlay
+            // Non-activating overlay: never take focus from the host application.
             this.Topmost = true;
             this.AllowsTransparency = true;
             this.Background = Brushes.Transparent;
@@ -44,14 +50,9 @@ namespace TypeRight.WPFOverlay
             this.ShowActivated = false;
             this.Focusable = false;
 
-            // Initialize suggestions panel once
-            if (!_suggestionsInitialized)
-            {
-                _suggestionsInitialized = true;
-                var panel = this.SuggestionsPanel ?? this.FindName("SuggestionsPanel") as StackPanel;
-                if (panel != null)
-                    panel.MouseLeftButtonUp += OnSuggestionsMouseLeftButtonUp;
-            }
+            AutomationProperties.SetName(this, "Typing suggestion overlay");
+            AutomationProperties.SetHelpText(
+                this, "Tab to a suggestion, press Enter to apply it, or press Escape to dismiss.");
         }
 
         /// <summary>
@@ -68,7 +69,8 @@ namespace TypeRight.WPFOverlay
         }
 
         /// <summary>
-        /// Sets the suggestions list in the overlay.
+        /// Sets the suggestions list in the overlay. Buttons provide accessible
+        /// names and keyboard activation without any global key capture.
         /// </summary>
         /// <param name="suggestions">The list of suggestion strings.</param>
         public void SetSuggestions(List<string> suggestions)
@@ -78,23 +80,39 @@ namespace TypeRight.WPFOverlay
                 return;
 
             suggestionsPanel.Children.Clear();
-            _suggestionCount = 0;
+            _suggestions.Clear();
             if (suggestions == null)
                 return;
 
-            foreach (var suggestion in suggestions)
+            foreach (string raw in suggestions)
             {
-                if (string.IsNullOrEmpty(suggestion)) continue;
+                if (string.IsNullOrEmpty(raw)) continue;
 
-                int index = _suggestionCount++;
-                var suggestionText = new TextBlock
+                int index = _suggestions.Count;
+                string suggestion = raw;
+                _suggestions.Add(suggestion);
+
+                var button = new Button
                 {
-                    Text = suggestion,
                     Tag = index,
-                    Margin = new Thickness(5),
-                    Cursor = Cursors.Hand
+                    Content = suggestion,
+                    Margin = new Thickness(4, 1, 4, 1),
+                    Padding = new Thickness(6, 2, 6, 2),
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    HorizontalContentAlignment = HorizontalAlignment.Left,
+                    Background = Brushes.Transparent,
+                    BorderBrush = Brushes.Transparent,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x2C, 0x3E, 0x50)),
+                    Cursor = Cursors.Hand,
+                    Focusable = true,
+                    IsTabStop = true
                 };
-                suggestionsPanel.Children.Add(suggestionText);
+                AutomationProperties.SetAutomationId(button, "suggestion_" + index);
+                AutomationProperties.SetName(button, "Suggestion " + (index + 1) + ": " + suggestion);
+                AutomationProperties.SetHelpText(button, "Press Enter to apply this suggestion.");
+                button.Click += (_, __) => RaiseSelection(index, suggestion);
+                button.KeyDown += OnSuggestionKeyDown;
+                suggestionsPanel.Children.Add(button);
             }
         }
 
@@ -152,22 +170,48 @@ namespace TypeRight.WPFOverlay
             base.Close();
         }
 
-        private void OnSuggestionsMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void OnSuggestionKeyDown(object sender, KeyEventArgs e)
         {
-            var source = e.OriginalSource as FrameworkElement;
-            int? index = source?.Tag as int?;
-            string suggestion = source is TextBlock text ? text.Text : source?.Tag as string;
-            if ((!index.HasValue || index.Value < 0 || index.Value >= _suggestionCount) &&
-                string.IsNullOrEmpty(suggestion))
-                return; // click on empty panel space, not on a suggestion
+            if (!(sender is Button button) || !(button.Tag is int index) ||
+                index < 0 || index >= _suggestions.Count)
+                return;
 
-            e.Handled = true;
-            if (index.HasValue && index.Value >= 0 && index.Value < _suggestionCount)
-                SuggestionSelectedIndexed?.Invoke(this,
-                    new SuggestionSelectionEventArgs(index.Value, suggestion));
-            else
-                SuggestionSelected?.Invoke(this, suggestion);
-            this.Close();
+            switch (e.Key)
+            {
+                case Key.Down:
+                case Key.Right:
+                    FocusSuggestion(SuggestionNavigator.MoveNext(index, _suggestions.Count));
+                    e.Handled = true;
+                    break;
+                case Key.Up:
+                case Key.Left:
+                    FocusSuggestion(SuggestionNavigator.MovePrevious(index, _suggestions.Count));
+                    e.Handled = true;
+                    break;
+                case Key.Escape:
+                    SuggestionDismissRequested?.Invoke(this, EventArgs.Empty);
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        private void FocusSuggestion(int index)
+        {
+            var suggestionsPanel = this.SuggestionsPanel ?? this.FindName("SuggestionsPanel") as StackPanel;
+            if (suggestionsPanel == null || index < 0 || index >= suggestionsPanel.Children.Count)
+                return;
+            (suggestionsPanel.Children[index] as Button)?.Focus();
+        }
+
+        private void RaiseSelection(int index, string suggestion)
+        {
+            if (index < 0 || index >= _suggestions.Count)
+                return;
+
+            SuggestionSelectedIndexed?.Invoke(this,
+                new SuggestionSelectionEventArgs(index, suggestion));
+            SuggestionSelected?.Invoke(this, suggestion);
+            Dismiss();
         }
     }
 }

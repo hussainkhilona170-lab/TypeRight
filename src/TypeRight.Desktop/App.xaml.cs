@@ -297,6 +297,7 @@ namespace TypeRight.Desktop
                 if (_overlay != null) return;
                 _overlay = new OverlayWindow();
                 _overlay.SuggestionSelectedIndexed += OnOverlaySuggestionSelected;
+                _overlay.SuggestionDismissRequested += OnOverlayDismissRequested;
             }
         }
 
@@ -306,6 +307,11 @@ namespace TypeRight.Desktop
             if (token != null)
                 _pipeServer?.TryResolveSuggestion(token, e.Index);
             HideOverlay();
+        }
+
+        private void OnOverlayDismissRequested(object sender, EventArgs e)
+        {
+            DismissActiveSuggestion();
         }
 
         private void StartOverlayTimer()

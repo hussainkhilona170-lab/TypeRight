@@ -130,6 +130,10 @@ Use a lightweight, non-activating WPF popup that appears above the target applic
 - Document detach, focus change, pause, timeout or a new offer dismisses the
   pending suggestion. The overlay sets `ShowInTaskbar="False"` and never calls
   `Activate()` or `Focus()`.
+- Suggestions render as accessible buttons with stable automation IDs and names.
+  Arrow keys move between them only when the overlay already has keyboard focus;
+  Enter applies through the indexed event, Escape raises a dismissal request, and
+  no global key hook or focus-stealing call is used.
 - Caret coordinates are not in the protocol; the managed app anchors near the
   focused UI Automation element, then the pointer, then the work-area centre.
 
